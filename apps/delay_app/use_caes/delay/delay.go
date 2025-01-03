@@ -1,7 +1,7 @@
 package delay_use_case
 
 import (
-	"net/http"
+	"github.com/a179346/robert-go-monorepo/packages/roberthttp"
 )
 
 type DelayUseCase struct{}
@@ -10,6 +10,10 @@ func New() DelayUseCase {
 	return DelayUseCase{}
 }
 
-func (u DelayUseCase) AddRoutesTo(mux *http.ServeMux) {
-	mux.HandleFunc("GET /delay/{ms}", u.delayHandler)
+func (u DelayUseCase) NewGroup() roberthttp.RouterGroup {
+	group := roberthttp.NewGroup("/delay")
+
+	group.Handle("GET /{ms}", delayHandler)
+
+	return group
 }

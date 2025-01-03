@@ -10,23 +10,28 @@ import (
 	"github.com/a179346/robert-go-monorepo/packages/roberthttp"
 )
 
-func (u DelayUseCase) delayHandler(w http.ResponseWriter, req *http.Request) {
-	delayMs := req.PathValue("ms")
-	d := req.URL.Query().Get("d")
+func delayHandler(c *roberthttp.Context) {
+	delayMs := c.Req.PathValue("ms")
+	d := c.Req.URL().Query().Get("d")
 
 	ms, err := strconv.Atoi(delayMs)
 	if err != nil {
-		http.Error(w, "Invalid delay", http.StatusBadRequest)
+		err = c.Res.WriteError(http.StatusBadRequest, "Invalid delay", nil)
+		if err != nil {
+			log.Printf("Error writing response: %v", err)
+		}
 		return
 	}
 
-	data, err := delayQuery(req.Context(), ms, d)
+	data, err := delayQuery(c.Req.Context(), ms, d)
 	if err != nil {
 		log.Printf("Request cancelled: %v", err)
 		return
 	}
 
-	err = roberthttp.WriteJson(w, http.StatusOK, data)
+	err = c.Res.WriteJson(http.StatusOK, map[string]interface{}{
+		"data": data,
+	})
 	if err != nil {
 		log.Printf("Error writing response: %v", err)
 	}

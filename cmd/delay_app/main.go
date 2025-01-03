@@ -33,7 +33,7 @@ func main() {
 		log.Printf("Received signal: %v", sig)
 		log.Println("Shutting down server...")
 
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 		defer cancel()
 
 		if err := server.Shutdown(ctx); err != nil {
@@ -41,5 +41,6 @@ func main() {
 		}
 
 		log.Println("Server shut down successfully")
+		time.Sleep(5 * time.Second)
 	})
 }

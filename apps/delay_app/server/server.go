@@ -8,6 +8,7 @@ import (
 
 	delay_app_config "github.com/a179346/robert-go-monorepo/apps/delay_app/config"
 	delay_use_case "github.com/a179346/robert-go-monorepo/apps/delay_app/use_caes/delay"
+	"github.com/a179346/robert-go-monorepo/packages/roberthttp"
 )
 
 type Options struct {
@@ -19,13 +20,13 @@ type Server struct {
 }
 
 func New(config delay_app_config.ServerConfig, options Options) *Server {
-	mux := http.NewServeMux()
+	router := roberthttp.New()
 
-	options.DelayUseCase.AddRoutesTo(mux)
+	router.AddGroup(options.DelayUseCase.NewGroup())
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),
-		Handler: mux,
+		Handler: router.CreateHttpHandler(),
 	}
 
 	return &Server{httpserver: server}
