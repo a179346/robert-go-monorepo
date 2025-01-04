@@ -6,10 +6,10 @@ import (
 	"log"
 	"net/http"
 
-	delay_app_config "github.com/a179346/robert-go-monorepo/apps/delay_app/config"
-	delay_use_case "github.com/a179346/robert-go-monorepo/apps/delay_app/use_caes/delay"
-	"github.com/a179346/robert-go-monorepo/packages/robert_router_options"
-	"github.com/a179346/robert-go-monorepo/packages/roberthttp"
+	delay_app_config "github.com/a179346/robert-go-monorepo/internal/delay_app/config"
+	delay_use_case "github.com/a179346/robert-go-monorepo/internal/delay_app/use_caes/delay"
+	"github.com/a179346/robert-go-monorepo/pkg/robert_router_options"
+	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
 )
 
 type Options struct {

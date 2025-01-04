@@ -3,7 +3,7 @@ package set_test
 import (
 	"testing"
 
-	"github.com/a179346/robert-go-monorepo/packages/set"
+	"github.com/a179346/robert-go-monorepo/pkg/set"
 )
 
 func TestSet(t *testing.T) {
