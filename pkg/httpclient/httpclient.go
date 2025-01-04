@@ -2,7 +2,6 @@ package httpclient
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -33,12 +32,16 @@ type RequestOptions struct {
 }
 
 func (c *HTTPClient) Request(ctx context.Context, options RequestOptions) (*http.Response, error) {
-	url := c.formatUrl(options.Url, options.Queries)
+	url, err := formatUrl(c.baseUrl, options.Url, options.Queries)
+	if err != nil {
+		return nil, err
+	}
 
 	req, err := http.NewRequest(options.Method, url, options.Body)
 	if err != nil {
 		return nil, err
 	}
+
 	req = req.WithContext(ctx)
 
 	if options.Headers != nil {
@@ -50,25 +53,21 @@ func (c *HTTPClient) Request(ctx context.Context, options RequestOptions) (*http
 	return c.client.Do(req)
 }
 
-func (c *HTTPClient) formatUrl(path string, queries Queries) string {
-	baseUrl := c.baseUrl
-	if len(baseUrl) > 0 && baseUrl[len(baseUrl)-1] == '/' {
-		baseUrl = baseUrl[:len(baseUrl)-1]
+func formatUrl(baseUrl, path string, queries Queries) (string, error) {
+	u, err := url.Parse(baseUrl)
+	if err != nil {
+		return "", err
 	}
 
-	if len(path) > 0 && path[0] == '/' {
-		path = path[1:]
+	if path != "" {
+		u = u.JoinPath(path)
 	}
 
-	queryString := ""
+	q := u.Query()
 	for k, v := range queries {
-		queryString += fmt.Sprintf("%s=%s", url.QueryEscape(k), url.QueryEscape(v))
+		q.Add(k, v)
 	}
+	u.RawQuery = q.Encode()
 
-	url := fmt.Sprintf("%s/%s", baseUrl, path)
-	if len(queryString) > 0 {
-		url += fmt.Sprintf("?%s", queryString)
-	}
-
-	return url
+	return u.String(), nil
 }

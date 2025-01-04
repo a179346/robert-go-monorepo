@@ -11,5 +11,5 @@ func New() DelayUseCase {
 }
 
 func (u DelayUseCase) HandleGroup(group *roberthttp.RouterGroup) {
-	group.Handle("GET /{ms}", delayHandler)
+	group.Handle("GET /{ms}", u.delayHandler)
 }

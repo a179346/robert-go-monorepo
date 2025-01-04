@@ -10,7 +10,7 @@ import (
 	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
 )
 
-func delayHandler(c *roberthttp.Context) {
+func (u DelayUseCase) delayHandler(c *roberthttp.Context) {
 	delayMs := c.Req.PathValue("ms")
 	d := c.Req.URL().Query().Get("d")
 
