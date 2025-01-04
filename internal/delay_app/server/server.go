@@ -8,8 +8,8 @@ import (
 
 	delay_app_config "github.com/a179346/robert-go-monorepo/internal/delay_app/config"
 	delay_use_case "github.com/a179346/robert-go-monorepo/internal/delay_app/use_caes/delay"
-	"github.com/a179346/robert-go-monorepo/pkg/robert_router_options"
 	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
+	"github.com/a179346/robert-go-monorepo/pkg/roberthttp_extended"
 )
 
 type Options struct {
@@ -20,13 +20,8 @@ type Server struct {
 	httpserver *http.Server
 }
 
-type JsonResponse struct {
-	StatusCode int         `json:"statusCode"`
-	Data       interface{} `json:"data"`
-}
-
 func New(config delay_app_config.ServerConfig, options Options) *Server {
-	router := roberthttp.New(robert_router_options.GetRouterOptions())
+	router := roberthttp.New(roberthttp_extended.GetRouterOptions())
 
 	options.DelayUseCase.HandleGroup(router.Group("/delay"))
 

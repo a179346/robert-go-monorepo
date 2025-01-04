@@ -1,16 +1,24 @@
 package roberthttp
 
-type ResponseErrorWrapper func(statusCode int, message string, data interface{}) interface{}
+import "fmt"
 
-type DefaultResponseError struct {
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
+type ResponseErrorWrapper func(statusCode int, message string, info interface{}) interface{}
+
+type DefaultResponseError[T interface{}] struct {
+	Status  int    `json:"status"`
+	Message string `json:"message"`
+	Info    T      `json:"info"`
 }
 
-func defaultResponseErrorWrapper(statusCode int, message string, data interface{}) interface{} {
-	return DefaultResponseError{
+func (e DefaultResponseError[T]) Error() string {
+	return fmt.Sprintf("HTTP Response Error (%d): %s", e.Status, e.Message)
+}
+
+func defaultResponseErrorWrapper(statusCode int, message string, info interface{}) interface{} {
+	return DefaultResponseError[interface{}]{
+		Status:  statusCode,
 		Message: message,
-		Data:    data,
+		Info:    info,
 	}
 }
 

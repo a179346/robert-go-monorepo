@@ -1,13 +1,11 @@
-package robert_router_options
+package roberthttp_extended
 
-import "github.com/a179346/robert-go-monorepo/pkg/roberthttp"
-
-type JsonResponse struct {
-	Data interface{} `json:"data"`
-}
+import (
+	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
+)
 
 func ResponseJsonWrapper(_ int, data interface{}) interface{} {
-	return JsonResponse{
+	return JsonResponse[interface{}]{
 		Data: data,
 	}
 }

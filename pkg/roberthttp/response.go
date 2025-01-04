@@ -40,15 +40,15 @@ func (res Response) WriteJson(statusCode int, data interface{}) error {
 	return json.NewEncoder(res.w).Encode(v)
 }
 
-func (res Response) WriteError(statusCode int, message string, data interface{}) error {
+func (res Response) WriteError(statusCode int, message string, info interface{}) error {
 	res.SetHeader("Content-Type", "application/json")
 	res.w.WriteHeader(statusCode)
 
 	var v interface{}
 	if res.options.ErrorWrapper != nil {
-		v = res.options.ErrorWrapper(statusCode, message, data)
+		v = res.options.ErrorWrapper(statusCode, message, info)
 	} else {
-		v = defaultResponseErrorWrapper(statusCode, message, data)
+		v = defaultResponseErrorWrapper(statusCode, message, info)
 	}
 
 	return json.NewEncoder(res.w).Encode(v)
