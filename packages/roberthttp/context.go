@@ -1,7 +1,5 @@
 package roberthttp
 
-import "net/http"
-
 type NextFunc func()
 
 type Context struct {
@@ -10,10 +8,10 @@ type Context struct {
 	Next NextFunc
 }
 
-func newContext(w http.ResponseWriter, req *http.Request) *Context {
+func newContext(res Response, req *Request) *Context {
 	return &Context{
-		Res:  newResponse(w),
-		Req:  newRequest(req),
+		Res:  res,
+		Req:  req,
 		Next: func() {},
 	}
 }

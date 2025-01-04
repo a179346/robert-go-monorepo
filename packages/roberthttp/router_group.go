@@ -5,13 +5,13 @@ type RouterGroup struct {
 	prefix string
 }
 
-func NewGroup(prefix string) RouterGroup {
+func newGroup(prefix string, options *RouterOptions) *RouterGroup {
 	if prefix[len(prefix)-1] == '/' {
 		prefix = prefix[:len(prefix)-1]
 	}
 
-	return RouterGroup{
-		Router: New(),
+	return &RouterGroup{
+		Router: New(options),
 		prefix: prefix,
 	}
 }

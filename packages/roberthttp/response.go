@@ -7,16 +7,15 @@ import (
 )
 
 type Response struct {
-	w http.ResponseWriter
+	w       http.ResponseWriter
+	options *ResponseOptions
 }
 
-type ErrorResponse struct {
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
-}
-
-func newResponse(w http.ResponseWriter) Response {
-	return Response{w}
+func newResponse(w http.ResponseWriter, options *ResponseOptions) Response {
+	return Response{
+		w:       w,
+		options: options,
+	}
 }
 
 func (res Response) SetHeader(key, value string) {
@@ -30,14 +29,29 @@ func (res Response) SetStatue(statusCode int) {
 func (res Response) WriteJson(statusCode int, data interface{}) error {
 	res.SetHeader("Content-Type", "application/json")
 	res.w.WriteHeader(statusCode)
-	return json.NewEncoder(res.w).Encode(data)
+
+	var v interface{}
+	if res.options.JsonWrapper != nil {
+		v = res.options.JsonWrapper(statusCode, data)
+	} else {
+		v = defaultResponseJsonWrapper(statusCode, data)
+	}
+
+	return json.NewEncoder(res.w).Encode(v)
 }
 
 func (res Response) WriteError(statusCode int, message string, data interface{}) error {
-	return res.WriteJson(statusCode, ErrorResponse{
-		Message: message,
-		Data:    data,
-	})
+	res.SetHeader("Content-Type", "application/json")
+	res.w.WriteHeader(statusCode)
+
+	var v interface{}
+	if res.options.ErrorWrapper != nil {
+		v = res.options.ErrorWrapper(statusCode, message, data)
+	} else {
+		v = defaultResponseErrorWrapper(statusCode, message, data)
+	}
+
+	return json.NewEncoder(res.w).Encode(v)
 }
 
 func (res Response) GetWriter() io.Writer {

@@ -4,56 +4,20 @@ import (
 	"net/http"
 )
 
-type HandlerFunc func(c *Context)
+func getHTTPHandleFunc(router Router, handlerFuncCollection HandlerFuncCollection) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		res := newResponse(w, router.options.Response)
+		c := newContext(res, newRequest(r))
+		var handle func(idx int)
+		handle = func(idx int) {
+			if idx == handlerFuncCollection.Len() {
+				return
+			}
+			c.Next = func() { handle(idx + 1) }
 
-type Handler interface {
-	AddHandlerFuncs([]HandlerFunc)
-	ServeHTTP(http.ResponseWriter, *http.Request)
-}
-
-type HandlerImpl struct {
-	handlerFuncs []HandlerFunc
-}
-
-func newHandler() HandlerImpl {
-	return HandlerImpl{}
-}
-
-func (h *HandlerImpl) AddHandlerFuncs(handlerFuncs []HandlerFunc) {
-	h.handlerFuncs = append(h.handlerFuncs, handlerFuncs...)
-}
-
-func (handler HandlerImpl) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	c := newContext(w, req)
-	var handle func(idx int)
-	handle = func(idx int) {
-		if idx == len(handler.handlerFuncs) {
-			return
+			handlerFuncCollection.GetHandlerFunc(idx)(c)
 		}
-		c.Next = func() { handle(idx + 1) }
 
-		handler.handlerFuncs[idx](c)
+		handle(0)
 	}
-
-	handle(0)
-}
-
-type PatternHandler struct {
-	HandlerImpl
-	pattern string
-}
-
-func newPatternHandler(pattern string) PatternHandler {
-	return PatternHandler{
-		HandlerImpl: newHandler(),
-		pattern:     pattern,
-	}
-}
-
-type AllHandler struct {
-	HandlerImpl
-}
-
-func newAllHandler() AllHandler {
-	return AllHandler{newHandler()}
 }

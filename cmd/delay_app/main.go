@@ -41,6 +41,5 @@ func main() {
 		}
 
 		log.Println("Server shut down successfully")
-		time.Sleep(5 * time.Second)
 	})
 }

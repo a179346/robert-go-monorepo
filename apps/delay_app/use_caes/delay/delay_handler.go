@@ -29,9 +29,7 @@ func delayHandler(c *roberthttp.Context) {
 		return
 	}
 
-	err = c.Res.WriteJson(http.StatusOK, map[string]interface{}{
-		"data": data,
-	})
+	err = c.Res.WriteJson(http.StatusOK, data)
 	if err != nil {
 		log.Printf("Error writing response: %v", err)
 	}
