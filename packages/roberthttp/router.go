@@ -2,14 +2,14 @@ package roberthttp
 
 import (
 	"net/http"
-)
 
-type empty struct{}
+	"github.com/a179346/robert-go-monorepo/packages/set"
+)
 
 type Router struct {
 	handlers []HandlerFuncCollection
 	groups   []*RouterGroup
-	patterns map[string]empty
+	patterns *set.Set[string]
 	options  *RouterOptions
 }
 
@@ -17,7 +17,7 @@ func New(options *RouterOptions) Router {
 	options = defaultRouterOptions(options)
 
 	return Router{
-		patterns: make(map[string]empty),
+		patterns: set.New[string](),
 		options:  options,
 	}
 }
@@ -37,7 +37,7 @@ func (r *Router) Handle(pattern string, handlerFuncs ...HandlerFunc) {
 	handler.AddHandlerFuncs(handlerFuncs)
 	r.handlers = append(r.handlers, &handler)
 
-	r.patterns[pattern] = empty{}
+	r.patterns.Add(pattern)
 }
 
 func (r *Router) Group(prefix string) *RouterGroup {
@@ -56,7 +56,7 @@ func (r *Router) Group(prefix string) *RouterGroup {
 func (r Router) CreateHttpHandler() http.Handler {
 	mux := http.NewServeMux()
 
-	for pattern := range r.patterns {
+	for pattern := range r.patterns.All() {
 		mergedHandler := newHandlerFuncCollection()
 		for _, handler := range r.handlers {
 			if h, ok := handler.(*PatternHandlerFuncCollection); ok && h.pattern == pattern {
