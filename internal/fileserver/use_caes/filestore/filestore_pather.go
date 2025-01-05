@@ -13,3 +13,11 @@ func newFileStorePather(rootPath string) fileStorePather {
 func (pather fileStorePather) getFilePath(filename string) string {
 	return filepath.Join(pather.rootPath, filename)
 }
+
+func (pather fileStorePather) getTempFolder() string {
+	return filepath.Join(pather.rootPath, "temp")
+}
+
+func (pather fileStorePather) getTempFilePath(id string) string {
+	return filepath.Join(pather.getTempFolder(), id)
+}

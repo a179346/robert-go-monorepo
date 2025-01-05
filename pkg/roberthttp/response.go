@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 )
 
 type Response struct {
@@ -22,7 +23,7 @@ func (res Response) SetHeader(key, value string) {
 	res.w.Header().Set(key, value)
 }
 
-func (res Response) SetStatue(statusCode int) {
+func (res Response) SetStatus(statusCode int) {
 	res.w.WriteHeader(statusCode)
 }
 
@@ -52,6 +53,14 @@ func (res Response) WriteError(statusCode int, message string, info interface{})
 	}
 
 	return json.NewEncoder(res.w).Encode(v)
+}
+
+func (res Response) ServeFile(req *Request, filepath string) {
+	http.ServeFile(res.w, req.req, filepath)
+}
+
+func (res Response) ServeContent(req *Request, name string, modtime time.Time, content io.ReadSeeker) {
+	http.ServeContent(res.w, req.req, name, modtime, content)
 }
 
 func (res Response) GetWriter() io.Writer {

@@ -2,6 +2,7 @@ package roberthttp
 
 import (
 	"context"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 )
@@ -24,4 +25,16 @@ func (req *Request) URL() *url.URL {
 
 func (req *Request) Context() context.Context {
 	return req.req.Context()
+}
+
+func (req *Request) FormFile(key string) (multipart.File, *multipart.FileHeader, error) {
+	return req.req.FormFile(key)
+}
+
+func (req *Request) FormValue(key string) string {
+	return req.req.FormValue(key)
+}
+
+func (req *Request) GetHeader(key string) string {
+	return req.req.Header.Get(key)
 }

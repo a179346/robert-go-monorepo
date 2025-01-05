@@ -10,6 +10,7 @@ import (
 	delay_use_case "github.com/a179346/robert-go-monorepo/internal/delay_app/use_caes/delay"
 	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
 	"github.com/a179346/robert-go-monorepo/pkg/roberthttp_extended"
+	"github.com/rs/cors"
 )
 
 type Options struct {
@@ -25,9 +26,10 @@ func New(config delay_app_config.ServerConfig, options Options) *Server {
 
 	options.DelayUseCase.AppendHandler(router.SubRouter("/delay"))
 
+	handler := router.CreateHttpHandler()
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),
-		Handler: router.CreateHttpHandler(),
+		Handler: cors.AllowAll().Handler(handler),
 	}
 
 	return &Server{httpserver: server}

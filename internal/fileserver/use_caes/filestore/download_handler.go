@@ -1,55 +1,47 @@
 package filestore_use_case
 
 import (
-	"io"
+	"errors"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 
+	"github.com/a179346/robert-go-monorepo/pkg/filesystem"
 	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
 )
 
+var ErrFileNotFound = errors.New("file not found")
+
 func (fs FileStoreUseCase) downloadHandler(c *roberthttp.Context) {
 	filename := c.Req.URL().Query().Get("filename")
-	filepath := fs.fileStorePather.getFilePath(filename)
-
-	file, err := downloadQuery(filepath)
+	filepath, err := downloadQuery(fs.fileStorePather, filename)
 	if err != nil {
-		err = c.Res.WriteError(http.StatusBadRequest, err.Error(), nil)
-		if err != nil {
-			log.Printf("Error writing response: %v", err)
+		var err2 error
+		if errors.Is(err, ErrFileNotFound) {
+			err2 = c.Res.WriteError(http.StatusBadRequest, err.Error(), nil)
+		} else {
+			err2 = c.Res.WriteError(http.StatusInternalServerError, "Something went wrong", nil)
+		}
+		if err2 != nil {
+			log.Printf("Error writing response: %v", err2)
 		}
 		return
 	}
-	defer file.Close()
 
 	c.Res.SetHeader("Content-Disposition", "attachment; filename="+strconv.Quote(filename))
-	c.Res.SetHeader("Content-Type", "application/octet-stream")
-	err = pipe(file, c.Res.GetWriter(), 1024)
+	c.Res.ServeFile(c.Req, filepath)
+}
+
+func downloadQuery(fileStorePather fileStorePather, filename string) (string, error) {
+	filepath := fileStorePather.getFilePath(filename)
+
+	existsResult, err := filesystem.Exists(filepath)
 	if err != nil {
-		log.Printf("Writing file failed: %v", err)
+		return "", err
 	}
-}
-
-func downloadQuery(filepath string) (*os.File, error) {
-	return os.Open(filepath)
-}
-
-func pipe(reader io.Reader, writer io.Writer, chunksize int) error {
-	b := make([]byte, chunksize)
-	for {
-		n, err := reader.Read(b)
-		if err == io.EOF {
-			return nil
-		}
-		if err != nil {
-			return err
-		}
-
-		_, err = writer.Write(b[:n])
-		if err != nil {
-			return err
-		}
+	if existsResult == filesystem.ExistsResultNotFound || existsResult == filesystem.ExistsResultDir {
+		return "", ErrFileNotFound
 	}
+
+	return filepath, nil
 }
