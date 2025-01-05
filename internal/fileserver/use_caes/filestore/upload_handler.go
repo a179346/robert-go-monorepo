@@ -119,25 +119,10 @@ func (chunk chunk) write(filepath string) error {
 	}
 	defer file.Close()
 
-	writen := 0
-	p := make([]byte, 512)
-	for writen < chunk.length {
-		read, err := chunk.blob.Read(p)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		if read == 0 {
-			continue
-		}
-
-		write, err := file.WriteAt(p[:read], int64(chunk.offset)+int64(writen))
-		if err != nil {
-			return err
-		}
-		writen += write
+	w := io.NewOffsetWriter(file, int64(chunk.offset))
+	_, err = io.Copy(w, chunk.blob)
+	if err != nil {
+		return err
 	}
 
 	return nil
