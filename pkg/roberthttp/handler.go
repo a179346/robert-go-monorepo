@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-func getHTTPHandleFunc(router Router, handlerFuncCollection HandlerFuncCollection) http.HandlerFunc {
+func getHTTPHandleFunc(router Router, handlerFuncCollection *HandlerFuncCollection) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		res := newResponse(w, router.options.Response)
 		c := newContext(res, newRequest(r))

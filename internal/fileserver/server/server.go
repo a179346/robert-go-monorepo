@@ -23,7 +23,7 @@ type Server struct {
 func New(config fileserver_config.ServerConfig, options Options) *Server {
 	router := roberthttp.New(roberthttp_extended.GetRouterOptions())
 
-	options.FileStoreUseCase.HandleGroup(router.Group("/filestore"))
+	options.FileStoreUseCase.AppendHandler(router.SubRouter("/filestore"))
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),

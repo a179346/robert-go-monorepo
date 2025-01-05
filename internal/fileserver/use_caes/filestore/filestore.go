@@ -15,6 +15,6 @@ func New(config fileserver_config.StoreConfig) FileStoreUseCase {
 	}
 }
 
-func (filestore FileStoreUseCase) HandleGroup(group *roberthttp.RouterGroup) {
-	group.Handle("/download", filestore.downloadHandler)
+func (filestore FileStoreUseCase) AppendHandler(router *roberthttp.Router) {
+	router.Handle("/download", filestore.downloadHandler)
 }

@@ -23,7 +23,7 @@ type Server struct {
 func New(config delay_app_config.ServerConfig, options Options) *Server {
 	router := roberthttp.New(roberthttp_extended.GetRouterOptions())
 
-	options.DelayUseCase.HandleGroup(router.Group("/delay"))
+	options.DelayUseCase.AppendHandler(router.SubRouter("/delay"))
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),

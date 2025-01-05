@@ -10,6 +10,6 @@ func New() DelayUseCase {
 	return DelayUseCase{}
 }
 
-func (u DelayUseCase) HandleGroup(group *roberthttp.RouterGroup) {
-	group.Handle("GET /{ms}", u.delayHandler)
+func (u DelayUseCase) AppendHandler(router *roberthttp.Router) {
+	router.Handle("GET /{ms}", u.delayHandler)
 }
