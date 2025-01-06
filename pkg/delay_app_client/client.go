@@ -18,7 +18,7 @@ func New(baseUrl string, client http.Client) *Client {
 	return &Client{httpclient.New(baseUrl, client)}
 }
 
-type DelayResponse roberthttp_extended.JsonResponse[string]
+type DelayResponse roberthttp_extended.CutsomJsonResponseData[string]
 
 func (c *Client) Delay(ctx context.Context, ms int, data string) (*DelayResponse, error) {
 	resp, err := c.client.Request(ctx, httpclient.RequestOptions{

@@ -2,34 +2,29 @@ package filestore_use_case
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/a179346/robert-go-monorepo/pkg/filesystem"
 	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
+	"github.com/a179346/robert-go-monorepo/pkg/roberthttp/roberthttp_response"
 )
 
 var ErrFileNotFound = errors.New("file not found")
 
-func (fs FileStoreUseCase) downloadHandler(c *roberthttp.Context) {
+func (fs FileStoreUseCase) downloadHandler(c *roberthttp.Context) roberthttp.HttpResponse {
 	filename := c.Req.URL().Query().Get("filename")
 	filepath, err := downloadQuery(fs.fileStorePather, filename)
 	if err != nil {
-		var err2 error
 		if errors.Is(err, ErrFileNotFound) {
-			err2 = c.Res.WriteError(http.StatusBadRequest, err.Error(), nil)
-		} else {
-			err2 = c.Res.WriteError(http.StatusInternalServerError, "Something went wrong", nil)
+			return roberthttp_response.NewErrorResponse(http.StatusBadRequest, err)
 		}
-		if err2 != nil {
-			log.Printf("Error writing response: %v", err2)
-		}
-		return
+		return roberthttp_response.NewErrorResponse(http.StatusInternalServerError, errors.New("Something went wrong"))
 	}
 
 	c.Res.SetHeader("Content-Disposition", "attachment; filename="+strconv.Quote(filename))
 	c.Res.ServeFile(c.Req, filepath)
+	return nil
 }
 
 func downloadQuery(fileStorePather fileStorePather, filename string) (string, error) {

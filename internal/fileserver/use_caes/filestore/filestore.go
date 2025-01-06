@@ -16,6 +16,6 @@ func New(config fileserver_config.StoreConfig) FileStoreUseCase {
 }
 
 func (filestore FileStoreUseCase) AppendHandler(router *roberthttp.Router) {
-	router.Handle("/download", filestore.downloadHandler)
+	router.Handle("GET /download", filestore.downloadHandler)
 	router.Handle("POST /upload/{id}", filestore.uploadHandler)
 }

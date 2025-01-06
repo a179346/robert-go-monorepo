@@ -1,6 +1,6 @@
 package roberthttp
 
-type NextFunc func()
+type NextFunc func() HttpResponse
 
 type Context struct {
 	Res  Response
@@ -12,6 +12,6 @@ func newContext(res Response, req *Request) *Context {
 	return &Context{
 		Res:  res,
 		Req:  req,
-		Next: func() {},
+		Next: func() HttpResponse { return nil },
 	}
 }

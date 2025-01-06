@@ -11,7 +11,7 @@ type StoreConfig struct {
 func newStoreConfig() StoreConfig {
 	rootPath := os.Getenv("STORE_ROOT_PATH")
 	if rootPath == "" {
-		rootPath = "./store/fileserver"
+		rootPath = "./storage/fileserver/store"
 	}
 
 	return StoreConfig{

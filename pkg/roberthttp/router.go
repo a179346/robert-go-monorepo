@@ -11,15 +11,11 @@ type Router struct {
 	handlers   []*HandlerFuncCollection
 	subRouters []*Router
 	patterns   *set.Set[string]
-	options    *RouterOptions
 }
 
-func New(options *RouterOptions) *Router {
-	options = defaultRouterOptions(options)
-
+func New() *Router {
 	return &Router{
 		patterns: set.New[string](),
-		options:  options,
 	}
 }
 
@@ -41,7 +37,7 @@ func (r *Router) Handle(pattern string, handlerFuncs ...HandlerFunc) {
 }
 
 func (r *Router) SubRouter(prefix string) *Router {
-	subRouter := New(r.options)
+	subRouter := New()
 
 	if len(prefix) > 0 && prefix[len(prefix)-1] == '/' {
 		prefix = prefix[:len(prefix)-1]

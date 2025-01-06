@@ -4,20 +4,22 @@ import (
 	"net/http"
 )
 
-func getHTTPHandleFunc(router Router, handlerFuncCollection *HandlerFuncCollection) http.HandlerFunc {
+func getHTTPHandleFunc(_ Router, handlerFuncCollection *HandlerFuncCollection) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		res := newResponse(w, router.options.Response)
+		res := newResponse(w)
 		c := newContext(res, newRequest(r))
-		var handle func(idx int)
-		handle = func(idx int) {
+		var handle func(idx int) HttpResponse
+		handle = func(idx int) HttpResponse {
 			if idx == handlerFuncCollection.Len() {
-				return
+				return nil
 			}
-			c.Next = func() { handle(idx + 1) }
+			c.Next = func() HttpResponse { return handle(idx + 1) }
 
-			handlerFuncCollection.GetHandlerFunc(idx)(c)
+			return handlerFuncCollection.GetHandlerFunc(idx)(c)
 		}
 
-		handle(0)
+		if httpResponse := handle(0); httpResponse != nil {
+			httpResponse.Send(c.Res, c.Req)
+		}
 	}
 }

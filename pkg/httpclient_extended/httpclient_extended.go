@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
+	"github.com/a179346/robert-go-monorepo/pkg/roberthttp/roberthttp_response"
 )
 
 func HandleResponse[T any](resp *http.Response, responseObject *T) (*T, error) {
@@ -16,7 +16,7 @@ func HandleResponse[T any](resp *http.Response, responseObject *T) (*T, error) {
 	}
 
 	if resp.StatusCode >= http.StatusBadRequest {
-		var errResponse roberthttp.DefaultResponseError[interface{}]
+		var errResponse roberthttp_response.ErrorHttpResponse[interface{}]
 		if err := json.Unmarshal(body, &errResponse); err != nil {
 			return nil, err
 		}

@@ -5,14 +5,23 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type Request struct {
-	req *http.Request
+	req       *http.Request
+	timestamp time.Time
 }
 
 func newRequest(req *http.Request) *Request {
-	return &Request{req}
+	return &Request{
+		req:       req,
+		timestamp: time.Now(),
+	}
+}
+
+func (req *Request) GetTimestamp() time.Time {
+	return req.timestamp
 }
 
 func (req *Request) PathValue(name string) string {

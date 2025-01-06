@@ -9,7 +9,6 @@ import (
 	delay_app_config "github.com/a179346/robert-go-monorepo/internal/delay_app/config"
 	delay_use_case "github.com/a179346/robert-go-monorepo/internal/delay_app/use_caes/delay"
 	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
-	"github.com/a179346/robert-go-monorepo/pkg/roberthttp_extended"
 	"github.com/rs/cors"
 )
 
@@ -22,7 +21,7 @@ type Server struct {
 }
 
 func New(config delay_app_config.ServerConfig, options Options) *Server {
-	router := roberthttp.New(roberthttp_extended.GetRouterOptions())
+	router := roberthttp.New()
 
 	options.DelayUseCase.AppendHandler(router.SubRouter("/delay"))
 

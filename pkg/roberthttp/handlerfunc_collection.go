@@ -1,6 +1,6 @@
 package roberthttp
 
-type HandlerFunc func(c *Context)
+type HandlerFunc func(c *Context) HttpResponse
 
 type HandlerFuncCollection struct {
 	handlerFuncs []HandlerFunc
