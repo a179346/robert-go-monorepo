@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	fileserver_config "github.com/a179346/robert-go-monorepo/internal/fileserver/config"
@@ -29,17 +28,16 @@ func main() {
 		}
 	}()
 
-	graceful_shutdown.OnShutdown(func(sig os.Signal) {
-		log.Printf("Received signal: %v", sig)
-		log.Println("Shutting down server...")
+	signal := <-graceful_shutdown.ShutDown()
+	log.Printf("Received signal: %v", signal)
+	log.Println("Shutting down server...")
 
-		ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
-		defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
 
-		if err := server.Shutdown(ctx); err != nil {
-			log.Printf("Error shutting down server: %v", err)
-		}
+	if err := server.Shutdown(ctx); err != nil {
+		log.Printf("Error shutting down server: %v", err)
+	}
 
-		log.Println("Server shut down successfully")
-	})
+	log.Println("Server shut down successfully")
 }

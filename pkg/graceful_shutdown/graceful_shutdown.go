@@ -6,10 +6,8 @@ import (
 	"syscall"
 )
 
-func OnShutdown(f func(singal os.Signal)) {
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-
-	sig := <-quit
-	f(sig)
+func ShutDown() <-chan os.Signal {
+	shutDownChannel := make(chan os.Signal, 1)
+	signal.Notify(shutDownChannel, syscall.SIGINT, syscall.SIGTERM)
+	return shutDownChannel
 }
