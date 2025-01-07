@@ -18,7 +18,7 @@ func main() {
 	server := fileserver_server.New(
 		config.Server,
 		fileserver_server.Options{
-			FileStoreUseCase: filestore_use_case.New(config.Store),
+			FileStoreUseCase: filestore_use_case.New(config.Storage),
 		},
 	)
 

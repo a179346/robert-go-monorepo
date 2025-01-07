@@ -9,9 +9,9 @@ type FileStoreUseCase struct {
 	fileStorePather fileStorePather
 }
 
-func New(config fileserver_config.StoreConfig) FileStoreUseCase {
+func New(config fileserver_config.StorageConfig) FileStoreUseCase {
 	return FileStoreUseCase{
-		fileStorePather: newFileStorePather(config.RootPath),
+		fileStorePather: newFileStorePather(config.StoreRootPath),
 	}
 }
 

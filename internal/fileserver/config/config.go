@@ -1,13 +1,13 @@
 package fileserver_config
 
 type Config struct {
-	Server ServerConfig
-	Store  StoreConfig
+	Server  ServerConfig
+	Storage StorageConfig
 }
 
 func New() Config {
 	return Config{
-		Server: newServerConfig(),
-		Store:  newStoreConfig(),
+		Server:  newServerConfig(),
+		Storage: newStorageConfig(),
 	}
 }
