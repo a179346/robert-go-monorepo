@@ -1,7 +1,9 @@
 package roberthttp_response
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
@@ -21,12 +23,16 @@ func NewErrorResponse[TError error](statusCode int, err TError) ErrorHttpRespons
 	}
 }
 
-func (e ErrorHttpResponse[T]) Error() string {
-	return fmt.Sprintf("default http error [%d]: %s", e.Status, e.Message)
+func (r ErrorHttpResponse[T]) Error() string {
+	return fmt.Sprintf("default http error [%d]: %s", r.Status, r.Message)
 }
 
-func (e ErrorHttpResponse[T]) Send(res roberthttp.Response, _ *roberthttp.Request) {
+func (r ErrorHttpResponse[T]) Send(res roberthttp.Response, req *roberthttp.Request) {
+	if errors.Is(req.RootContext().Err(), context.Canceled) {
+		return
+	}
+
 	res.SetHeader("Content-Type", "application/json")
-	res.SetStatus(e.Status)
-	json.NewEncoder(res.GetWriter()).Encode(e)
+	res.SetStatus(r.Status)
+	json.NewEncoder(res).Encode(r)
 }

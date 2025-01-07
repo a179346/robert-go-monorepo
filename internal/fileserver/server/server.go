@@ -9,6 +9,7 @@ import (
 	fileserver_config "github.com/a179346/robert-go-monorepo/internal/fileserver/config"
 	filestore_use_case "github.com/a179346/robert-go-monorepo/internal/fileserver/use_caes/filestore"
 	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
+	"github.com/a179346/robert-go-monorepo/pkg/roberthttp_extended"
 	"github.com/rs/cors"
 )
 
@@ -22,6 +23,8 @@ type Server struct {
 
 func New(config fileserver_config.ServerConfig, options Options) *Server {
 	router := roberthttp.New()
+
+	router.Use(roberthttp_extended.NotFoundMiddleware)
 
 	options.FileStoreUseCase.AppendHandler(router.SubRouter("/filestore"))
 

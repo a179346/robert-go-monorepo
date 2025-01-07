@@ -7,7 +7,9 @@ import (
 func getHTTPHandleFunc(_ Router, handlerFuncCollection *HandlerFuncCollection) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		res := newResponse(w)
-		c := newContext(res, newRequest(r))
+		req := newRequest(r)
+		c := newContext(res, req)
+
 		var handle func(idx int) HttpResponse
 		handle = func(idx int) HttpResponse {
 			if idx == handlerFuncCollection.Len() {

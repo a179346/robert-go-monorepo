@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -35,8 +34,10 @@ func (u DelayUseCase) delayHandler(c *roberthttp.Context) roberthttp.HttpRespons
 
 	data, err := delayQuery(c.Req.Context(), ms, d)
 	if err != nil {
-		log.Printf("Request cancelled: %v", err)
-		return nil
+		return roberthttp_response.NewErrorResponse(
+			http.StatusInternalServerError,
+			errors.New("Something went wrong"),
+		)
 	}
 
 	return roberthttp_extended.NewCustomJsonResponse(http.StatusOK, data)

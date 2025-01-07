@@ -24,14 +24,14 @@ func (res Response) SetStatus(statusCode int) {
 	res.w.WriteHeader(statusCode)
 }
 
+func (res Response) Write(p []byte) (n int, err error) {
+	return res.w.Write(p)
+}
+
 func (res Response) ServeFile(req *Request, filepath string) {
 	http.ServeFile(res.w, req.req, filepath)
 }
 
 func (res Response) ServeContent(req *Request, name string, modtime time.Time, content io.ReadSeeker) {
 	http.ServeContent(res.w, req.req, name, modtime, content)
-}
-
-func (res Response) GetWriter() io.Writer {
-	return res.w
 }

@@ -1,7 +1,9 @@
 package roberthttp_extended
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
 )
@@ -22,8 +24,12 @@ func NewCustomJsonResponse[T interface{}](statusCode int, data T) CutsomJsonHttp
 	}
 }
 
-func (r CutsomJsonHttpResponse[T]) Send(res roberthttp.Response, _ *roberthttp.Request) {
+func (r CutsomJsonHttpResponse[T]) Send(res roberthttp.Response, req *roberthttp.Request) {
+	if errors.Is(req.RootContext().Err(), context.Canceled) {
+		return
+	}
+
 	res.SetHeader("Content-Type", "application/json")
 	res.SetStatus(r.Status)
-	json.NewEncoder(res.GetWriter()).Encode(r.Data)
+	json.NewEncoder(res).Encode(r.Data)
 }

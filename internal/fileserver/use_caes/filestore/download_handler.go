@@ -24,7 +24,7 @@ func (fs FileStoreUseCase) downloadHandler(c *roberthttp.Context) roberthttp.Htt
 
 	c.Res.SetHeader("Content-Disposition", "attachment; filename="+strconv.Quote(filename))
 	c.Res.ServeFile(c.Req, filepath)
-	return nil
+	return roberthttp_response.NewDummyResponse()
 }
 
 func downloadQuery(fileStorePather fileStorePather, filename string) (string, error) {

@@ -14,8 +14,10 @@ type Router struct {
 }
 
 func New() *Router {
+	patterns := set.New[string]()
+	patterns.Add("/")
 	return &Router{
-		patterns: set.New[string](),
+		patterns: patterns,
 	}
 }
 

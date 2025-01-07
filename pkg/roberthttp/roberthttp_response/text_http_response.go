@@ -1,6 +1,9 @@
 package roberthttp_response
 
 import (
+	"context"
+	"errors"
+
 	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
 )
 
@@ -16,8 +19,12 @@ func NewTextResponse(statusCode int, text string) TextHttpResponse {
 	}
 }
 
-func (r TextHttpResponse) Send(res roberthttp.Response, _ *roberthttp.Request) {
+func (r TextHttpResponse) Send(res roberthttp.Response, req *roberthttp.Request) {
+	if errors.Is(req.RootContext().Err(), context.Canceled) {
+		return
+	}
+
 	res.SetHeader("Content-Type", "text/plain")
 	res.SetStatus(r.Status)
-	res.GetWriter().Write([]byte(r.Text))
+	res.Write([]byte(r.Text))
 }

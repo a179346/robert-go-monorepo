@@ -10,12 +10,14 @@ import (
 
 type Request struct {
 	req       *http.Request
+	ctx       context.Context
 	timestamp time.Time
 }
 
 func newRequest(req *http.Request) *Request {
 	return &Request{
 		req:       req,
+		ctx:       req.Context(),
 		timestamp: time.Now(),
 	}
 }
@@ -32,8 +34,16 @@ func (req *Request) URL() *url.URL {
 	return req.req.URL
 }
 
-func (req *Request) Context() context.Context {
+func (req *Request) RootContext() context.Context {
 	return req.req.Context()
+}
+
+func (req *Request) Context() context.Context {
+	return req.ctx
+}
+
+func (req *Request) SetContext(ctx context.Context) {
+	req.ctx = ctx
 }
 
 func (req *Request) FormFile(key string) (multipart.File, *multipart.FileHeader, error) {
