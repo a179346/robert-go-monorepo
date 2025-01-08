@@ -4,10 +4,10 @@ import (
 	"net/http"
 )
 
-func getHTTPHandleFunc(router *Router, handlers []*handler) http.HandlerFunc {
+func getHTTPHandleFunc(fullPrefix string, handlers []*handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		res := newResponse(w)
-		req := newRequest(r, router.fullPrefix)
+		req := newRequest(r, fullPrefix)
 		c := newContext(res, req)
 
 		var handle func(idx int) HttpResponse

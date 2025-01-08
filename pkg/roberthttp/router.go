@@ -54,7 +54,7 @@ func (r *Router) CreateHttpHandler() http.Handler {
 
 	for pattern, handlers := range handlersMap {
 		if len(handlers) > 0 {
-			mux.HandleFunc(pattern, getHTTPHandleFunc(r, handlers))
+			mux.HandleFunc(pattern, getHTTPHandleFunc(r.fullPrefix, handlers))
 		}
 	}
 
