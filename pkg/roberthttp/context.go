@@ -1,10 +1,10 @@
 package roberthttp
 
-type HandlerFunc func(c *Context) HttpResponse
-
 type HttpResponse interface {
 	Send(Response, *Request)
 }
+
+type HandlerFunc func(c *Context) HttpResponse
 
 type NextFunc func() HttpResponse
 

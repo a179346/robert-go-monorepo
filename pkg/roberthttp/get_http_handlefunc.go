@@ -4,24 +4,25 @@ import (
 	"net/http"
 )
 
-func getHTTPHandleFunc(router Router, handlerGroup *handlerGroup) http.HandlerFunc {
+func getHTTPHandleFunc(router *Router, handlers []*handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		res := newResponse(w)
-		req := newRequest(r, router.fullprefix)
+		req := newRequest(r, router.fullPrefix)
 		c := newContext(res, req)
 
 		var handle func(idx int) HttpResponse
 		handle = func(idx int) HttpResponse {
-			if idx == handlerGroup.len() {
+			if idx == len(handlers) {
 				return nil
 			}
+
 			c.Next = func() HttpResponse { return handle(idx + 1) }
 
-			handlerFuncWithPrefix := handlerGroup.getHandlerFuncWithPrefix(idx)
+			handler := handlers[idx]
 
 			originalPrefix := req.getCurrPrefix()
-			req.setCurrPrefix(handlerFuncWithPrefix.prefix)
-			httpResponse := handlerFuncWithPrefix.f(c)
+			req.setCurrPrefix(handler.owner.fullPrefix)
+			httpResponse := handler.f(c)
 			req.setCurrPrefix(originalPrefix)
 
 			return httpResponse

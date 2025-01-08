@@ -2,60 +2,44 @@ package roberthttp
 
 import (
 	"net/http"
-
-	"github.com/a179346/robert-go-monorepo/pkg/set"
 )
 
 type Router struct {
-	prefix        string
-	fullprefix    string
-	handlerGroups []*handlerGroup
-	subRouters    []*Router
-	patterns      *set.Set[string]
+	prefix            string
+	fullPrefix        string
+	handlerRepository *handlerRepository
+	parentRouter      *Router
+	subRouters        []*Router
 }
 
 func New() *Router {
-	patterns := set.New[string]()
-	patterns.Add("/")
 	return &Router{
-		patterns: patterns,
+		handlerRepository: newHandlerRepository(),
 	}
 }
 
 func (r *Router) Use(handlerFuncs ...HandlerFunc) {
-	handlerGroup := newHandlerGroup("", true)
 	for _, f := range handlerFuncs {
-		handlerFuncWithPrefix := newHandlerFuncWithPrefix(f, r.fullprefix)
-		handlerGroup.addHandlerFuncWithPrefix(handlerFuncWithPrefix)
+		r.handlerRepository.addHandler(f, r, "", true)
 	}
-	r.appendHandlerGroup(&handlerGroup)
 }
 
 func (r *Router) Handle(pattern string, handlerFuncs ...HandlerFunc) {
-	handlerGroup := newHandlerGroup(pattern, false)
 	for _, f := range handlerFuncs {
-		handlerFuncWithPrefix := newHandlerFuncWithPrefix(f, r.fullprefix)
-		handlerGroup.addHandlerFuncWithPrefix(handlerFuncWithPrefix)
+		r.handlerRepository.addHandler(f, r, pattern, false)
 	}
-
-	r.appendHandlerGroup(&handlerGroup)
-
-	r.patterns.Add(pattern)
 }
 
 func (r *Router) SubRouter(prefix string) *Router {
-	subRouter := New()
-
 	if len(prefix) > 0 && prefix[len(prefix)-1] == '/' {
 		prefix = prefix[:len(prefix)-1]
 	}
-	subRouter.prefix = prefix
-	subRouter.fullprefix = r.fullprefix + prefix
 
-	for _, handlerGroup := range r.handlerGroups {
-		if handlerGroup.all {
-			subRouter.appendHandlerGroup(handlerGroup)
-		}
+	subRouter := &Router{
+		prefix:            prefix,
+		fullPrefix:        r.fullPrefix + prefix,
+		handlerRepository: r.handlerRepository,
+		parentRouter:      r,
 	}
 
 	r.subRouters = append(r.subRouters, subRouter)
@@ -63,14 +47,14 @@ func (r *Router) SubRouter(prefix string) *Router {
 	return subRouter
 }
 
-func (r Router) CreateHttpHandler() http.Handler {
+func (r *Router) CreateHttpHandler() http.Handler {
 	mux := http.NewServeMux()
 
-	handlerGroupMap := r.getHandlerGroupMap()
+	handlersMap := r.getHandlersMap()
 
-	for _, handlerGroup := range handlerGroupMap {
-		if handlerGroup.len() > 0 {
-			mux.HandleFunc(handlerGroup.pattern, getHTTPHandleFunc(r, handlerGroup))
+	for pattern, handlers := range handlersMap {
+		if len(handlers) > 0 {
+			mux.HandleFunc(pattern, getHTTPHandleFunc(r, handlers))
 		}
 	}
 
@@ -82,33 +66,36 @@ func (r Router) CreateHttpHandler() http.Handler {
 	return mux
 }
 
-func (r Router) getHandlerGroupMap() map[string]*handlerGroup {
-	handlerGroupMap := make(map[string]*handlerGroup)
+func (r *Router) getHandlersMap() map[string][]*handler {
+	handlersMap := make(map[string][]*handler)
+	handlersMap["/"] = make([]*handler, 0)
 
-	for pattern := range r.patterns.All() {
-		mergedHandlerGroup := newHandlerGroup(pattern, false)
-		handlerGroupMap[pattern] = &mergedHandlerGroup
-	}
-
-	for _, handlerGroup := range r.handlerGroups {
-		if handlerGroup.all {
-			for _, mergedHandlerGroup := range handlerGroupMap {
-				mergedHandlerGroup.copyHandlerFuncWithPrefixsFrom(handlerGroup)
+	for _, h := range r.handlerRepository.getHandlers() {
+		if !h.all && h.owner == r {
+			if _, ok := handlersMap[h.pattern]; !ok {
+				handlersMap[h.pattern] = make([]*handler, 0)
 			}
-		} else {
-			mergedHandlerGroup := handlerGroupMap[handlerGroup.pattern]
-			mergedHandlerGroup.copyHandlerFuncWithPrefixsFrom(handlerGroup)
 		}
 	}
 
-	return handlerGroupMap
+	for _, handler := range r.handlerRepository.getHandlers() {
+		if handler.all && (handler.owner == r || r.isAncestor(handler.owner)) {
+			for pattern := range handlersMap {
+				handlersMap[pattern] = append(handlersMap[pattern], handler)
+			}
+		} else if !handler.all && handler.owner == r {
+			pattern := handler.pattern
+			handlersMap[pattern] = append(handlersMap[pattern], handler)
+		}
+	}
+
+	return handlersMap
 }
 
-func (r *Router) appendHandlerGroup(handlerGroup *handlerGroup) {
-	r.handlerGroups = append(r.handlerGroups, handlerGroup)
-	if handlerGroup.all {
-		for _, router := range r.subRouters {
-			router.appendHandlerGroup(handlerGroup)
-		}
+func (r *Router) isAncestor(router *Router) bool {
+	parentRouter := r.parentRouter
+	if parentRouter == router {
+		return true
 	}
+	return parentRouter != nil && parentRouter.isAncestor(router)
 }
