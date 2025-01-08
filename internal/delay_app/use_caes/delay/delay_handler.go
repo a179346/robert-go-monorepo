@@ -15,7 +15,7 @@ import (
 
 func (u DelayUseCase) delayHandler(c *roberthttp.Context) roberthttp.HttpResponse {
 	delayMs := c.Req.PathValue("ms")
-	d := c.Req.URL().Query().Get("d")
+	d := c.Req.GetQuery("d")
 
 	ms, err := strconv.Atoi(delayMs)
 	if err != nil {

@@ -24,9 +24,9 @@ type Server struct {
 func New(config delay_app_config.ServerConfig, options Options) *Server {
 	router := roberthttp.New()
 
-	router.Use(roberthttp_extended.NotFoundMiddleware)
-
 	options.DelayUseCase.AppendHandler(router.SubRouter("/delay"))
+
+	router.Use(roberthttp_extended.NotFoundHandler)
 
 	handler := router.CreateHttpHandler()
 	server := &http.Server{

@@ -7,10 +7,11 @@ import (
 )
 
 type Router struct {
-	prefix     string
-	handlers   []*HandlerFuncCollection
-	subRouters []*Router
-	patterns   *set.Set[string]
+	prefix        string
+	fullprefix    string
+	handlerGroups []*handlerGroup
+	subRouters    []*Router
+	patterns      *set.Set[string]
 }
 
 func New() *Router {
@@ -22,18 +23,22 @@ func New() *Router {
 }
 
 func (r *Router) Use(handlerFuncs ...HandlerFunc) {
-	handler := newHandlerFuncCollection("", true)
-	handler.AddHandlerFuncs(handlerFuncs)
-	r.handlers = append(r.handlers, &handler)
-	for _, router := range r.subRouters {
-		router.Use(handlerFuncs...)
+	handlerGroup := newHandlerGroup("", true)
+	for _, f := range handlerFuncs {
+		handlerFuncWithPrefix := newHandlerFuncWithPrefix(f, r.fullprefix)
+		handlerGroup.addHandlerFuncWithPrefix(handlerFuncWithPrefix)
 	}
+	r.appendHandlerGroup(&handlerGroup)
 }
 
 func (r *Router) Handle(pattern string, handlerFuncs ...HandlerFunc) {
-	handler := newHandlerFuncCollection(pattern, false)
-	handler.AddHandlerFuncs(handlerFuncs)
-	r.handlers = append(r.handlers, &handler)
+	handlerGroup := newHandlerGroup(pattern, false)
+	for _, f := range handlerFuncs {
+		handlerFuncWithPrefix := newHandlerFuncWithPrefix(f, r.fullprefix)
+		handlerGroup.addHandlerFuncWithPrefix(handlerFuncWithPrefix)
+	}
+
+	r.appendHandlerGroup(&handlerGroup)
 
 	r.patterns.Add(pattern)
 }
@@ -45,10 +50,11 @@ func (r *Router) SubRouter(prefix string) *Router {
 		prefix = prefix[:len(prefix)-1]
 	}
 	subRouter.prefix = prefix
+	subRouter.fullprefix = r.fullprefix + prefix
 
-	for _, handler := range r.handlers {
-		if handler.all {
-			subRouter.handlers = append(subRouter.handlers, handler)
+	for _, handlerGroup := range r.handlerGroups {
+		if handlerGroup.all {
+			subRouter.appendHandlerGroup(handlerGroup)
 		}
 	}
 
@@ -60,7 +66,13 @@ func (r *Router) SubRouter(prefix string) *Router {
 func (r Router) CreateHttpHandler() http.Handler {
 	mux := http.NewServeMux()
 
-	r.appendHandlersToServerMux(mux)
+	handlerGroupMap := r.getHandlerGroupMap()
+
+	for _, handlerGroup := range handlerGroupMap {
+		if handlerGroup.len() > 0 {
+			mux.HandleFunc(handlerGroup.pattern, getHTTPHandleFunc(r, handlerGroup))
+		}
+	}
 
 	for _, router := range r.subRouters {
 		prefix := router.prefix
@@ -70,25 +82,33 @@ func (r Router) CreateHttpHandler() http.Handler {
 	return mux
 }
 
-func (r Router) appendHandlersToServerMux(mux *http.ServeMux) {
-	mergedHandlerMap := make(map[string]*HandlerFuncCollection)
+func (r Router) getHandlerGroupMap() map[string]*handlerGroup {
+	handlerGroupMap := make(map[string]*handlerGroup)
 
 	for pattern := range r.patterns.All() {
-		mergedHandler := newHandlerFuncCollection(pattern, false)
-		mergedHandlerMap[pattern] = &mergedHandler
+		mergedHandlerGroup := newHandlerGroup(pattern, false)
+		handlerGroupMap[pattern] = &mergedHandlerGroup
 	}
 
-	for _, handler := range r.handlers {
-		if handler.all {
-			for _, mergedHandler := range mergedHandlerMap {
-				mergedHandler.AddHandlerFuncs(handler.handlerFuncs)
+	for _, handlerGroup := range r.handlerGroups {
+		if handlerGroup.all {
+			for _, mergedHandlerGroup := range handlerGroupMap {
+				mergedHandlerGroup.copyHandlerFuncWithPrefixsFrom(handlerGroup)
 			}
 		} else {
-			mergedHandlerMap[handler.pattern].AddHandlerFuncs(handler.handlerFuncs)
+			mergedHandlerGroup := handlerGroupMap[handlerGroup.pattern]
+			mergedHandlerGroup.copyHandlerFuncWithPrefixsFrom(handlerGroup)
 		}
 	}
 
-	for _, mergedHandler := range mergedHandlerMap {
-		mux.HandleFunc(mergedHandler.pattern, getHTTPHandleFunc(r, mergedHandler))
+	return handlerGroupMap
+}
+
+func (r *Router) appendHandlerGroup(handlerGroup *handlerGroup) {
+	r.handlerGroups = append(r.handlerGroups, handlerGroup)
+	if handlerGroup.all {
+		for _, router := range r.subRouters {
+			router.appendHandlerGroup(handlerGroup)
+		}
 	}
 }

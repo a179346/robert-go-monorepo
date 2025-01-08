@@ -13,7 +13,7 @@ import (
 var ErrFileNotFound = errors.New("file not found")
 
 func (fs FileStoreUseCase) downloadHandler(c *roberthttp.Context) roberthttp.HttpResponse {
-	filename := c.Req.URL().Query().Get("filename")
+	filename := c.Req.GetQuery("filename")
 	filepath, err := downloadQuery(fs.fileStorePather, filename)
 	if err != nil {
 		if errors.Is(err, ErrFileNotFound) {
