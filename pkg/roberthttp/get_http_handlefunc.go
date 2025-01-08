@@ -28,6 +28,7 @@ func getHTTPHandleFunc(router Router, handlerGroup *handlerGroup) http.HandlerFu
 		}
 
 		if httpResponse := handle(0); httpResponse != nil {
+			req.setCurrPrefix("")
 			httpResponse.Send(c.Res, c.Req)
 		}
 	}

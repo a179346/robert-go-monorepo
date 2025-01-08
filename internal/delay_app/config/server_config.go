@@ -1,19 +1,13 @@
 package delay_app_config
 
-import (
-	"os"
-	"strconv"
-)
+import "github.com/a179346/robert-go-monorepo/pkg/env_helper"
 
 type ServerConfig struct {
 	Port int
 }
 
 func newServerConfig() ServerConfig {
-	port := 8080
-	if p, err := strconv.Atoi(os.Getenv("PORT")); err == nil {
-		port = p
-	}
+	port := env_helper.GetIntEnv("SERVER_PORT", 8080)
 
 	return ServerConfig{
 		Port: port,

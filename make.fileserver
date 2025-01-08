@@ -1,16 +1,16 @@
 DOCKER_IMAGE_NAME ?= robert-go-monorepo/fileserver
 STORAGE_ROOT_PATH ?= /app/storage
 
-.PHONY: local_run
-local_run:
-	go run ./cmd/fileserver
+.PHONY: local_run_app
+local_run_app:
+	go run ./cmd/fileserver/app
 
-.PHONY: docker_build
-docker_build:
-	docker build -t="$(DOCKER_IMAGE_NAME)" -f ./dockerfiles/Dockerfile.fileserver .
+.PHONY: docker_build_app
+docker_build_app:
+	docker build -t="$(DOCKER_IMAGE_NAME)" -f ./dockerfiles/Dockerfile.fileserver.app .
 
-.PHONY: docker_run
-docker_run:
+.PHONY: docker_run_app
+docker_run_app:
 	docker run --rm --name fileserver \
 		-p 8081:8081 \
 		-v ./storage/fileserver:$(STORAGE_ROOT_PATH) \
