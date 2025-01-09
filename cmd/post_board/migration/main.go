@@ -15,23 +15,22 @@ func main() {
 
 	sourceURL := "file://" + config.Migration.FolderPath
 
+	// TODO - check db connected
+	// TODO - pool ?
 	db, err := opendb.Open(config.DB)
 	if err != nil {
-		log.Println("Error occurred: sql.Open")
-		log.Fatal(err)
+		log.Fatalf("opendb.Open error: %v", err)
 	}
 	defer db.Close()
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		log.Println("Error occurred: postgres.WithInstance")
-		log.Fatal(err)
+		log.Fatalf("postgres.WithInstance error: %v", err)
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(sourceURL, config.DB.Database, driver)
 	if err != nil {
-		log.Println("Error occurred: migrate.NewWithDatabaseInstance")
-		log.Fatal(err)
+		log.Fatalf("migrate.NewWithDatabaseInstance error: %v", err)
 	}
 	m.Log = NewMigationLogger(config.Migration.Verbose)
 
@@ -43,14 +42,12 @@ func main() {
 				return
 			}
 
-			log.Println("Error occurred: m.Up")
-			log.Fatal(err)
+			log.Fatalf("m.Up error: %v", err)
 		}
 	} else {
 		err = m.Steps(-1)
 		if err != nil {
-			log.Println("Error occurred: m.Steps(-1)")
-			log.Fatal(err)
+			log.Fatalf("m.Steps(-1) error: %v", err)
 		}
 	}
 }

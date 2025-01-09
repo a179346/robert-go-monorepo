@@ -2,6 +2,8 @@ package gohf
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"strings"
@@ -9,6 +11,8 @@ import (
 )
 
 type Request struct {
+	Body RequestBody
+
 	req        *http.Request
 	ctx        context.Context
 	timestamp  time.Time
@@ -18,6 +22,8 @@ type Request struct {
 
 func newRequest(req *http.Request, fullPrefix string) *Request {
 	return &Request{
+		Body: newRequestBody(req.Body),
+
 		req:        req,
 		ctx:        req.Context(),
 		timestamp:  time.Now(),
@@ -79,4 +85,24 @@ func (req *Request) getCurrPrefix() string {
 
 func (req *Request) setCurrPrefix(prefix string) {
 	req.currPrefix = prefix
+}
+
+type RequestBody struct {
+	body io.ReadCloser
+}
+
+func newRequestBody(body io.ReadCloser) RequestBody {
+	return RequestBody{body: body}
+}
+
+func (body RequestBody) Close() error {
+	return body.body.Close()
+}
+
+func (body RequestBody) Read(p []byte) (n int, err error) {
+	return body.body.Read(p)
+}
+
+func (body RequestBody) JsonDecode(v any) error {
+	return json.NewDecoder(body).Decode(v)
 }
