@@ -1,21 +1,30 @@
-POSTGRES_HOST ?= localhost
-POSTGRES_PORT ?= 5432
-POSTGRES_DB ?= post-board
-POSTGRES_USER ?= post-board-user
-POSTGRES_PASSWORD ?= mysecretpassword
-
-MIGRATION_FOLDER_PATH ?= internal/post_board/database/migrations
+DB_HOST ?= localhost
+DB_PORT ?= 5432
+DB_DATABASE ?= post-board
+DB_USER ?= post-board-user
+DB_PASSWORD ?= mysecretpassword
 
 .PHONY: docker_run_db
 docker_run_db:
 	docker run --rm --name post-board-postgres \
-		-p $(POSTGRES_PORT):5432 \
+		-p $(DB_PORT):5432 \
 		-v ./storage/post-board-db/data:/var/lib/postgresql/data \
-		-e POSTGRES_DB="$(POSTGRES_DB)" \
-		-e POSTGRES_USER="$(POSTGRES_USER)" \
-		-e POSTGRES_PASSWORD="$(POSTGRES_PASSWORD)" \
+		-e POSTGRES_DB="$(DB_DATABASE)" \
+		-e POSTGRES_USER="$(DB_USER)" \
+		-e POSTGRES_PASSWORD="$(DB_PASSWORD)" \
 		postgres:17.2-alpine3.21
 
+JET_GEN_OUTPUT_PATH ?= ./internal/post_board/jet_gen
+
+.PHONY: gen_jet_sql_builder
+gen_jet_sql_builder:
+	jet -dsn=postgresql://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_DATABASE)?sslmode=disable \
+		-schema=public \
+		-rel-model-path=./model \
+		-rel-table-path=./table \
+		-rel-view-path=./view \
+		-rel-enum-path=./enum \
+		-path=$(JET_GEN_OUTPUT_PATH)
 
 .PHONY: local_run_migration_up
 local_run_migration_up:
