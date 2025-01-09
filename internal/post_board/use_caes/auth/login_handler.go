@@ -18,8 +18,8 @@ type loginRequestBody struct {
 func (u AuthUseCase) loginHandler(c *gohf.Context) gohf.Response {
 	var body loginRequestBody
 
-	defer c.Req.Body.Close()
-	if err := c.Req.Body.JsonDecode(&body); err != nil {
+	defer c.Req.GetBody().Close()
+	if err := c.Req.GetBody().JsonDecode(&body); err != nil {
 		return gohf_responses.NewErrorResponse(
 			http.StatusBadRequest,
 			err,

@@ -4,65 +4,42 @@ import (
 	"net/http"
 )
 
-type prefixedHandlerFunc struct {
-	prefix string
-	f      HandlerFunc
-}
-
-func newPrefixedHandlerFunc(prefix string, f HandlerFunc) *prefixedHandlerFunc {
-	return &prefixedHandlerFunc{
-		prefix: prefix,
-		f:      f,
-	}
-}
-
 type httpHandler struct {
-	fullPrefix           string
-	prefixedHandlerFuncs []*prefixedHandlerFunc
+	handlerFuncs []HandlerFunc
 }
 
-func newHttpHandler(fullPrefix string) *httpHandler {
-	return &httpHandler{
-		fullPrefix: fullPrefix,
-	}
+func newHttpHandler() *httpHandler {
+	return &httpHandler{}
 }
 
 func (httpHandler *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	res := newResponseWriter(w)
-	req := newRequest(r, httpHandler.fullPrefix)
+	req := newRequest(r)
 	c := newContext(res, req)
 
 	var handle func(idx int) Response
 	handle = func(idx int) Response {
-		if idx == len(httpHandler.prefixedHandlerFuncs) {
+		if idx == len(httpHandler.handlerFuncs) {
 			return nil
 		}
 
 		c.Next = func() Response { return handle(idx + 1) }
 
-		handler := httpHandler.prefixedHandlerFuncs[idx]
-
-		originalPrefix := req.getCurrPrefix()
-		req.setCurrPrefix(handler.prefix)
-		response := handler.f(c)
-		req.setCurrPrefix(originalPrefix)
-
-		return response
+		return httpHandler.handlerFuncs[idx](c)
 	}
 
 	if response := handle(0); response != nil {
-		req.setCurrPrefix("")
 		response.Send(c.Res, c.Req)
 	}
 }
 
-func (httpHandler *httpHandler) addHandlerFunc(prefix string, f HandlerFunc) {
-	httpHandler.prefixedHandlerFuncs = append(
-		httpHandler.prefixedHandlerFuncs,
-		newPrefixedHandlerFunc(prefix, f),
+func (httpHandler *httpHandler) addHandlerFunc(handlerFunc HandlerFunc) {
+	httpHandler.handlerFuncs = append(
+		httpHandler.handlerFuncs,
+		handlerFunc,
 	)
 }
 
 func (httpHandler *httpHandler) len() int {
-	return len(httpHandler.prefixedHandlerFuncs)
+	return len(httpHandler.handlerFuncs)
 }

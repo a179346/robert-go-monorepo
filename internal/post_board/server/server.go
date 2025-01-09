@@ -28,10 +28,10 @@ func New(config post_board_config.ServerConfig, options Options) *Server {
 
 	router.Use(gohf_extended.NotFoundHandler)
 
-	handler := router.CreateHttpHandler()
+	mux := router.CreateServeMux()
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),
-		Handler: cors.AllowAll().Handler(handler),
+		Handler: cors.AllowAll().Handler(mux),
 	}
 
 	return &Server{httpserver: server}

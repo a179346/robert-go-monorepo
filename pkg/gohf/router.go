@@ -7,7 +7,6 @@ import (
 
 type Router struct {
 	prefix            string
-	fullPrefix        string
 	handlerRepository *handlerRepository
 	parentRouter      *Router
 	subRouters        []*Router
@@ -36,7 +35,6 @@ func (r *Router) SubRouter(prefix string) *Router {
 
 	subRouter := &Router{
 		prefix:            prefix,
-		fullPrefix:        r.fullPrefix + prefix,
 		handlerRepository: r.handlerRepository,
 		parentRouter:      r,
 	}
@@ -46,7 +44,7 @@ func (r *Router) SubRouter(prefix string) *Router {
 	return subRouter
 }
 
-func (r *Router) CreateHttpHandler() http.Handler {
+func (r *Router) CreateServeMux() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	httpHandlerMap := r.getHttpHandlerMap()
@@ -59,7 +57,7 @@ func (r *Router) CreateHttpHandler() http.Handler {
 
 	for _, router := range r.subRouters {
 		prefix := router.prefix
-		mux.Handle(prefix+"/", http.StripPrefix(prefix, router.CreateHttpHandler()))
+		mux.Handle(prefix+"/", http.StripPrefix(prefix, router.CreateServeMux()))
 	}
 
 	return mux
@@ -67,12 +65,12 @@ func (r *Router) CreateHttpHandler() http.Handler {
 
 func (r *Router) getHttpHandlerMap() map[string]*httpHandler {
 	httpHandlerMap := make(map[string]*httpHandler)
-	httpHandlerMap["/"] = newHttpHandler(r.fullPrefix)
+	httpHandlerMap["/"] = newHttpHandler()
 
 	for _, h := range r.handlerRepository.getHandlers() {
 		if !h.all && h.owner == r {
 			if _, ok := httpHandlerMap[h.pattern]; !ok {
-				httpHandlerMap[h.pattern] = newHttpHandler(r.fullPrefix)
+				httpHandlerMap[h.pattern] = newHttpHandler()
 			}
 		}
 	}
@@ -80,11 +78,11 @@ func (r *Router) getHttpHandlerMap() map[string]*httpHandler {
 	for _, handler := range r.handlerRepository.getHandlers() {
 		if handler.all && (handler.owner == r || r.hasAncestor(handler.owner)) {
 			for pattern := range httpHandlerMap {
-				httpHandlerMap[pattern].addHandlerFunc(handler.owner.fullPrefix, handler.f)
+				httpHandlerMap[pattern].addHandlerFunc(handler.f)
 			}
 		} else if !handler.all && handler.owner == r {
 			pattern := handler.pattern
-			httpHandlerMap[pattern].addHandlerFunc(handler.owner.fullPrefix, handler.f)
+			httpHandlerMap[pattern].addHandlerFunc(handler.f)
 		}
 	}
 

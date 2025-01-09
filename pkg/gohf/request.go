@@ -6,28 +6,22 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
-	"strings"
 	"time"
 )
 
 type Request struct {
-	Body RequestBody
-
-	req        *http.Request
-	ctx        context.Context
-	timestamp  time.Time
-	fullPrefix string
-	currPrefix string
+	req       *http.Request
+	ctx       context.Context
+	body      RequestBody
+	timestamp time.Time
 }
 
-func newRequest(req *http.Request, fullPrefix string) *Request {
+func newRequest(req *http.Request) *Request {
 	return &Request{
-		Body: newRequestBody(req.Body),
-
-		req:        req,
-		ctx:        req.Context(),
-		timestamp:  time.Now(),
-		fullPrefix: fullPrefix,
+		req:       req,
+		ctx:       req.Context(),
+		body:      newRequestBody(req.Body),
+		timestamp: time.Now(),
 	}
 }
 
@@ -35,16 +29,20 @@ func (req *Request) GetTimestamp() time.Time {
 	return req.timestamp
 }
 
+func (req *Request) Method() string {
+	return req.req.Method
+}
+
+func (req *Request) RemoteAddr() string {
+	return req.req.RemoteAddr
+}
+
 func (req *Request) Host() string {
 	return req.req.Host
 }
 
-func (req *Request) Path() string {
-	return strings.TrimPrefix(req.FullPath(), req.currPrefix)
-}
-
-func (req *Request) FullPath() string {
-	return req.fullPrefix + req.req.URL.Path
+func (req *Request) RequestURI() string {
+	return req.req.RequestURI
 }
 
 func (req *Request) RootContext() context.Context {
@@ -71,6 +69,10 @@ func (req *Request) GetQuery(key string) string {
 	return req.req.URL.Query().Get(key)
 }
 
+func (req *Request) GetBody() RequestBody {
+	return req.body
+}
+
 func (req *Request) FormFile(key string) (multipart.File, *multipart.FileHeader, error) {
 	return req.req.FormFile(key)
 }
@@ -79,12 +81,16 @@ func (req *Request) FormValue(key string) string {
 	return req.req.FormValue(key)
 }
 
-func (req *Request) getCurrPrefix() string {
-	return req.currPrefix
+func (req *Request) Cookies() []*http.Cookie {
+	return req.req.Cookies()
 }
 
-func (req *Request) setCurrPrefix(prefix string) {
-	req.currPrefix = prefix
+func (req *Request) Cookie(name string) (*http.Cookie, error) {
+	return req.req.Cookie(name)
+}
+
+func (req *Request) AddCookie(c *http.Cookie) {
+	req.req.AddCookie(c)
 }
 
 type RequestBody struct {
