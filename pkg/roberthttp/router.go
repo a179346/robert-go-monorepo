@@ -50,11 +50,11 @@ func (r *Router) SubRouter(prefix string) *Router {
 func (r *Router) CreateHttpHandler() http.Handler {
 	mux := http.NewServeMux()
 
-	handlersMap := r.getHandlersMap()
+	httpHandlerMap := r.getHttpHandlerMap()
 
-	for pattern, handlers := range handlersMap {
-		if len(handlers) > 0 {
-			mux.HandleFunc(pattern, getHTTPHandleFunc(r.fullPrefix, handlers))
+	for pattern, httpHandler := range httpHandlerMap {
+		if httpHandler.len() > 0 {
+			mux.Handle(pattern, httpHandler)
 		}
 	}
 
@@ -66,30 +66,30 @@ func (r *Router) CreateHttpHandler() http.Handler {
 	return mux
 }
 
-func (r *Router) getHandlersMap() map[string][]*handler {
-	handlersMap := make(map[string][]*handler)
-	handlersMap["/"] = make([]*handler, 0)
+func (r *Router) getHttpHandlerMap() map[string]*httpHandler {
+	httpHandlerMap := make(map[string]*httpHandler)
+	httpHandlerMap["/"] = newHttpHandler(r.fullPrefix)
 
 	for _, h := range r.handlerRepository.getHandlers() {
 		if !h.all && h.owner == r {
-			if _, ok := handlersMap[h.pattern]; !ok {
-				handlersMap[h.pattern] = make([]*handler, 0)
+			if _, ok := httpHandlerMap[h.pattern]; !ok {
+				httpHandlerMap[h.pattern] = newHttpHandler(r.fullPrefix)
 			}
 		}
 	}
 
 	for _, handler := range r.handlerRepository.getHandlers() {
 		if handler.all && (handler.owner == r || r.isAncestor(handler.owner)) {
-			for pattern := range handlersMap {
-				handlersMap[pattern] = append(handlersMap[pattern], handler)
+			for pattern := range httpHandlerMap {
+				httpHandlerMap[pattern].addHandlerFunc(handler.owner.fullPrefix, handler.f)
 			}
 		} else if !handler.all && handler.owner == r {
 			pattern := handler.pattern
-			handlersMap[pattern] = append(handlersMap[pattern], handler)
+			httpHandlerMap[pattern].addHandlerFunc(handler.owner.fullPrefix, handler.f)
 		}
 	}
 
-	return handlersMap
+	return httpHandlerMap
 }
 
 func (r *Router) isAncestor(router *Router) bool {
