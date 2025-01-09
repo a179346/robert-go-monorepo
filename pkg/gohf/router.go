@@ -2,6 +2,7 @@ package gohf
 
 import (
 	"net/http"
+	"strings"
 )
 
 type Router struct {
@@ -31,9 +32,7 @@ func (r *Router) Handle(pattern string, handlerFuncs ...HandlerFunc) {
 }
 
 func (r *Router) SubRouter(prefix string) *Router {
-	if len(prefix) > 0 && prefix[len(prefix)-1] == '/' {
-		prefix = prefix[:len(prefix)-1]
-	}
+	prefix = strings.TrimSuffix(prefix, "/")
 
 	subRouter := &Router{
 		prefix:            prefix,
@@ -79,7 +78,7 @@ func (r *Router) getHttpHandlerMap() map[string]*httpHandler {
 	}
 
 	for _, handler := range r.handlerRepository.getHandlers() {
-		if handler.all && (handler.owner == r || r.isAncestor(handler.owner)) {
+		if handler.all && (handler.owner == r || r.hasAncestor(handler.owner)) {
 			for pattern := range httpHandlerMap {
 				httpHandlerMap[pattern].addHandlerFunc(handler.owner.fullPrefix, handler.f)
 			}
@@ -92,10 +91,10 @@ func (r *Router) getHttpHandlerMap() map[string]*httpHandler {
 	return httpHandlerMap
 }
 
-func (r *Router) isAncestor(router *Router) bool {
+func (r *Router) hasAncestor(router *Router) bool {
 	parentRouter := r.parentRouter
 	if parentRouter == router {
 		return true
 	}
-	return parentRouter != nil && parentRouter.isAncestor(router)
+	return parentRouter != nil && parentRouter.hasAncestor(router)
 }
