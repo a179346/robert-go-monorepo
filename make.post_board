@@ -14,7 +14,7 @@ docker_run_db:
 		-e POSTGRES_PASSWORD="$(DB_PASSWORD)" \
 		postgres:17.2-alpine3.21
 
-JET_GEN_OUTPUT_PATH ?= ./internal/post_board/jet_gen
+JET_GEN_OUTPUT_PATH ?= ./internal/post_board/database/.jet_gen
 
 .PHONY: gen_jet_sql_builder
 gen_jet_sql_builder:
@@ -24,6 +24,7 @@ gen_jet_sql_builder:
 		-rel-table-path=./table \
 		-rel-view-path=./view \
 		-rel-enum-path=./enum \
+		-ignore-tables=schema_migrations \
 		-path=$(JET_GEN_OUTPUT_PATH)
 
 .PHONY: local_run_migration_up

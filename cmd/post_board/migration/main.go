@@ -1,15 +1,13 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
 	"log"
 
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
+	"github.com/a179346/robert-go-monorepo/internal/post_board/database/opendb"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -17,16 +15,7 @@ func main() {
 
 	sourceURL := "file://" + config.Migration.FolderPath
 
-	databaseURL := fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
-		config.DB.User,
-		config.DB.Password,
-		config.DB.Host,
-		config.DB.Port,
-		config.DB.Database,
-	)
-
-	db, err := sql.Open("postgres", databaseURL)
+	db, err := opendb.Open(config.DB)
 	if err != nil {
 		log.Println("Error occurred: sql.Open")
 		log.Fatal(err)

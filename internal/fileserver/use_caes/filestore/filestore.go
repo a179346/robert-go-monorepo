@@ -6,12 +6,16 @@ import (
 )
 
 type FileStoreUseCase struct {
-	fileStorePather fileStorePather
+	fileStoreQueries  fileStoreQueries
+	fileStoreCommands fileStoreCommands
 }
 
 func New(config fileserver_config.StorageConfig) FileStoreUseCase {
+	fileStorePather := newFileStorePather(config.StoreRootPath)
+
 	return FileStoreUseCase{
-		fileStorePather: newFileStorePather(config.StoreRootPath),
+		fileStoreQueries:  newFileStoreQueries(fileStorePather),
+		fileStoreCommands: newFileStoreCommands(fileStorePather),
 	}
 }
 

@@ -1,12 +1,10 @@
 package delay_use_case
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/a179346/robert-go-monorepo/pkg/gohf"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf/gohf_responses"
@@ -32,7 +30,7 @@ func (u DelayUseCase) delayHandler(c *gohf.Context) gohf.Response {
 		)
 	}
 
-	data, err := delayQuery(c.Req.Context(), ms, d)
+	data, err := u.delayQueries.getResult(c.Req.Context(), ms, d)
 	if err != nil {
 		return gohf_responses.NewErrorResponse(
 			http.StatusInternalServerError,
@@ -41,14 +39,4 @@ func (u DelayUseCase) delayHandler(c *gohf.Context) gohf.Response {
 	}
 
 	return gohf_extended.NewCustomJsonResponse(http.StatusOK, data)
-}
-
-func delayQuery(ctx context.Context, ms int, d string) (string, error) {
-	select {
-	case <-time.After(time.Duration(ms) * time.Millisecond):
-		return d, nil
-
-	case <-ctx.Done():
-		return "", ctx.Err()
-	}
 }
