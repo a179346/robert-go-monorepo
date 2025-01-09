@@ -8,25 +8,25 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
-	"github.com/a179346/robert-go-monorepo/pkg/roberthttp/roberthttp_response"
-	"github.com/a179346/robert-go-monorepo/pkg/roberthttp_extended"
+	"github.com/a179346/robert-go-monorepo/pkg/gohf"
+	"github.com/a179346/robert-go-monorepo/pkg/gohf/gohf_responses"
+	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 )
 
-func (u DelayUseCase) delayHandler(c *roberthttp.Context) roberthttp.HttpResponse {
+func (u DelayUseCase) delayHandler(c *gohf.Context) gohf.Response {
 	delayMs := c.Req.PathValue("ms")
 	d := c.Req.GetQuery("d")
 
 	ms, err := strconv.Atoi(delayMs)
 	if err != nil {
-		return roberthttp_response.NewErrorResponse(
+		return gohf_responses.NewErrorResponse(
 			http.StatusBadRequest,
 			fmt.Errorf("Invalid delay: %s", delayMs),
 		)
 	}
 
 	if ms < 0 || ms > 60000 {
-		return roberthttp_response.NewErrorResponse(
+		return gohf_responses.NewErrorResponse(
 			http.StatusBadRequest,
 			errors.New("Delay ms should be 0 ~ 60000"),
 		)
@@ -34,13 +34,13 @@ func (u DelayUseCase) delayHandler(c *roberthttp.Context) roberthttp.HttpRespons
 
 	data, err := delayQuery(c.Req.Context(), ms, d)
 	if err != nil {
-		return roberthttp_response.NewErrorResponse(
+		return gohf_responses.NewErrorResponse(
 			http.StatusInternalServerError,
 			errors.New("Something went wrong"),
 		)
 	}
 
-	return roberthttp_extended.NewCustomJsonResponse(http.StatusOK, data)
+	return gohf_extended.NewCustomJsonResponse(http.StatusOK, data)
 }
 
 func delayQuery(ctx context.Context, ms int, d string) (string, error) {

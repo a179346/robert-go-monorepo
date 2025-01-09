@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/a179346/robert-go-monorepo/pkg/httpclient"
 	"github.com/a179346/robert-go-monorepo/pkg/httpclient_extended"
-	"github.com/a179346/robert-go-monorepo/pkg/roberthttp_extended"
 )
 
 type Client struct {
@@ -18,7 +18,7 @@ func New(baseUrl string, client http.Client) *Client {
 	return &Client{httpclient.New(baseUrl, client)}
 }
 
-type DelayResponse roberthttp_extended.CutsomJsonResponseData[string]
+type DelayResponse gohf_extended.CutsomJsonResponseData[string]
 
 func (c *Client) Delay(ctx context.Context, ms int, data string) (*DelayResponse, error) {
 	resp, err := c.client.Request(ctx, httpclient.RequestOptions{

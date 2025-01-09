@@ -8,8 +8,8 @@ import (
 
 	fileserver_config "github.com/a179346/robert-go-monorepo/internal/fileserver/config"
 	filestore_use_case "github.com/a179346/robert-go-monorepo/internal/fileserver/use_caes/filestore"
-	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
-	"github.com/a179346/robert-go-monorepo/pkg/roberthttp_extended"
+	"github.com/a179346/robert-go-monorepo/pkg/gohf"
+	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/rs/cors"
 )
 
@@ -22,11 +22,11 @@ type Server struct {
 }
 
 func New(config fileserver_config.ServerConfig, options Options) *Server {
-	router := roberthttp.New()
+	router := gohf.New()
 
 	options.FileStoreUseCase.AppendHandler(router.SubRouter("/filestore"))
 
-	router.Use(roberthttp_extended.NotFoundHandler)
+	router.Use(gohf_extended.NotFoundHandler)
 
 	handler := router.CreateHttpHandler()
 	server := &http.Server{

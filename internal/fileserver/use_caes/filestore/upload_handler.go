@@ -9,39 +9,39 @@ import (
 	"strconv"
 
 	"github.com/a179346/robert-go-monorepo/pkg/filesystem"
-	"github.com/a179346/robert-go-monorepo/pkg/roberthttp"
-	"github.com/a179346/robert-go-monorepo/pkg/roberthttp/roberthttp_response"
+	"github.com/a179346/robert-go-monorepo/pkg/gohf"
+	"github.com/a179346/robert-go-monorepo/pkg/gohf/gohf_responses"
 )
 
-func (fs FileStoreUseCase) uploadHandler(c *roberthttp.Context) roberthttp.HttpResponse {
+func (fs FileStoreUseCase) uploadHandler(c *gohf.Context) gohf.Response {
 	uploadId := c.Req.PathValue("id")
 
 	blob, _, err := c.Req.FormFile("blob")
 	if err != nil {
-		return roberthttp_response.NewErrorResponse(http.StatusBadRequest, err)
+		return gohf_responses.NewErrorResponse(http.StatusBadRequest, err)
 	}
 	defer blob.Close()
 
 	offset, err := strconv.Atoi(c.Req.FormValue("offset"))
 	if err != nil || offset < 0 {
-		return roberthttp_response.NewErrorResponse(http.StatusBadRequest, errors.New("offset should be non-negative integer"))
+		return gohf_responses.NewErrorResponse(http.StatusBadRequest, errors.New("offset should be non-negative integer"))
 	}
 
 	length, err := strconv.Atoi(c.Req.FormValue("length"))
 	if err != nil || length < 0 {
-		return roberthttp_response.NewErrorResponse(http.StatusBadRequest, errors.New("length should be non-negative integer"))
+		return gohf_responses.NewErrorResponse(http.StatusBadRequest, errors.New("length should be non-negative integer"))
 	}
 
 	isLastChunk := false
 	if c.Req.FormValue("isLastChunk") == "true" {
 		isLastChunk = true
 	} else if c.Req.FormValue("isLastChunk") != "false" {
-		return roberthttp_response.NewErrorResponse(http.StatusBadRequest, errors.New("isLastChunk should be either true or false"))
+		return gohf_responses.NewErrorResponse(http.StatusBadRequest, errors.New("isLastChunk should be either true or false"))
 	}
 
 	filename := c.Req.GetHeader("filename")
 	if filename == "" {
-		return roberthttp_response.NewErrorResponse(http.StatusBadRequest, errors.New("filename is required"))
+		return gohf_responses.NewErrorResponse(http.StatusBadRequest, errors.New("filename is required"))
 	}
 
 	err = uploadCommand(
@@ -54,10 +54,10 @@ func (fs FileStoreUseCase) uploadHandler(c *roberthttp.Context) roberthttp.HttpR
 		filename,
 	)
 	if err != nil {
-		return roberthttp_response.NewErrorResponse(http.StatusInternalServerError, err)
+		return gohf_responses.NewErrorResponse(http.StatusInternalServerError, err)
 	}
 
-	return roberthttp_response.NewTextResponse(http.StatusOK, "OK")
+	return gohf_responses.NewTextResponse(http.StatusOK, "OK")
 }
 
 func uploadCommand(

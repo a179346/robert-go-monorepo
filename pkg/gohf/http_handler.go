@@ -1,4 +1,4 @@
-package roberthttp
+package gohf
 
 import (
 	"net/http"
@@ -28,31 +28,31 @@ func newHttpHandler(fullPrefix string) *httpHandler {
 }
 
 func (httpHandler *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	res := newResponse(w)
+	res := newResponseWriter(w)
 	req := newRequest(r, httpHandler.fullPrefix)
 	c := newContext(res, req)
 
-	var handle func(idx int) HttpResponse
-	handle = func(idx int) HttpResponse {
+	var handle func(idx int) Response
+	handle = func(idx int) Response {
 		if idx == len(httpHandler.prefixedHandlerFuncs) {
 			return nil
 		}
 
-		c.Next = func() HttpResponse { return handle(idx + 1) }
+		c.Next = func() Response { return handle(idx + 1) }
 
 		handler := httpHandler.prefixedHandlerFuncs[idx]
 
 		originalPrefix := req.getCurrPrefix()
 		req.setCurrPrefix(handler.prefix)
-		httpResponse := handler.f(c)
+		response := handler.f(c)
 		req.setCurrPrefix(originalPrefix)
 
-		return httpResponse
+		return response
 	}
 
-	if httpResponse := handle(0); httpResponse != nil {
+	if response := handle(0); response != nil {
 		req.setCurrPrefix("")
-		httpResponse.Send(c.Res, c.Req)
+		response.Send(c.Res, c.Req)
 	}
 }
 
