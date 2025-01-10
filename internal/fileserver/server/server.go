@@ -21,7 +21,7 @@ type Server struct {
 	httpserver *http.Server
 }
 
-func New(config fileserver_config.ServerConfig, options Options) *Server {
+func New(options Options) *Server {
 	router := gohf.New()
 
 	options.FileStoreUseCase.AppendHandler(router.SubRouter("/filestore"))
@@ -30,7 +30,7 @@ func New(config fileserver_config.ServerConfig, options Options) *Server {
 
 	mux := router.CreateServeMux()
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.Port),
+		Addr:    fmt.Sprintf(":%d", fileserver_config.GetServerConfig().Port),
 		Handler: cors.AllowAll().Handler(mux),
 	}
 

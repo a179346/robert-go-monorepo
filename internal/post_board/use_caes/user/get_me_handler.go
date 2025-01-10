@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/a179346/robert-go-monorepo/internal/post_board/middlewares"
+	"github.com/a179346/robert-go-monorepo/internal/post_board/shared/authed_context"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf/gohf_responses"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
@@ -20,7 +20,7 @@ type getMeResponseBody struct {
 }
 
 func (u UserUseCase) getMeHandler(c *gohf.Context) gohf.Response {
-	userId, ok := middlewares.AuthedContextValue(c.Req.Context())
+	userId, ok := authed_context.Value(c.Req.Context())
 	if !ok {
 		return gohf_responses.NewErrorResponse(
 			http.StatusInternalServerError,

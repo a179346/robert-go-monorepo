@@ -4,21 +4,19 @@ import (
 	"context"
 	"errors"
 
-	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/jwt_provider"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/user_provider"
+	"github.com/a179346/robert-go-monorepo/internal/post_board/shared/auth_jwt"
 	"github.com/a179346/robert-go-monorepo/pkg/cryption"
 	"github.com/go-jet/jet/qrm"
 )
 
 type authCommands struct {
 	userProvider user_provider.UserProvider
-	jwtProvider  jwt_provider.JwtProvider
 }
 
-func newAuthCommands(userProvider user_provider.UserProvider, jwtProvider jwt_provider.JwtProvider) authCommands {
+func newAuthCommands(userProvider user_provider.UserProvider) authCommands {
 	return authCommands{
 		userProvider: userProvider,
-		jwtProvider:  jwtProvider,
 	}
 }
 
@@ -39,5 +37,5 @@ func (authCommands authCommands) login(ctx context.Context, email string, passwo
 		return "", errWrongPassword
 	}
 
-	return authCommands.jwtProvider.Sign(user.ID.String())
+	return auth_jwt.Sign(user.ID.String())
 }

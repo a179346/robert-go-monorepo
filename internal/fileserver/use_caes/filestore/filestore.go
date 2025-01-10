@@ -10,8 +10,8 @@ type FileStoreUseCase struct {
 	fileStoreCommands fileStoreCommands
 }
 
-func New(config fileserver_config.StorageConfig) FileStoreUseCase {
-	fileStorePather := newFileStorePather(config.StoreRootPath)
+func New() FileStoreUseCase {
+	fileStorePather := newFileStorePather(fileserver_config.GetStorageConfig().StoreRootPath)
 
 	return FileStoreUseCase{
 		fileStoreQueries:  newFileStoreQueries(fileStorePather),

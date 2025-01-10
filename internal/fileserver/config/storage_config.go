@@ -7,17 +7,25 @@ import (
 )
 
 type StorageConfig struct {
+	isInited      bool
 	RootPath      string
 	StoreRootPath string
 }
 
-func newStorageConfig() StorageConfig {
-	rootPath := env_helper.GetStringEnv("STORAGE_ROOT_PATH", "./storage/fileserver")
+var storageConfig StorageConfig
 
-	storeRootPath := filepath.Join(rootPath, "store")
-
-	return StorageConfig{
-		RootPath:      rootPath,
-		StoreRootPath: storeRootPath,
+func initStorageConfig() {
+	if storageConfig.isInited {
+		return
 	}
+	storageConfig.RootPath = env_helper.GetStringEnv("STORAGE_ROOT_PATH", "./storage/fileserver")
+
+	storageConfig.StoreRootPath = filepath.Join(storageConfig.RootPath, "store")
+
+	storageConfig.isInited = true
+}
+
+func GetStorageConfig() StorageConfig {
+	initStorageConfig()
+	return storageConfig
 }

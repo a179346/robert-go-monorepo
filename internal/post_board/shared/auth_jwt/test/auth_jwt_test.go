@@ -1,25 +1,22 @@
-package jwt_provider_test
+package auth_jwt_test
 
 import (
 	"testing"
 
-	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/jwt_provider"
+	"github.com/a179346/robert-go-monorepo/internal/post_board/shared/auth_jwt"
 )
 
 func TestJwtProvider(t *testing.T) {
-	secret := "my-test-secret"
-	jwtProvider := jwt_provider.New(secret, 10)
-
 	t.Run("test jwt provider", func(t *testing.T) {
 		id := "asdjiovcasc1235"
 
-		token, err := jwtProvider.Sign(id)
+		token, err := auth_jwt.Sign(id)
 		if err != nil {
 			t.Errorf("sign error: %v", err)
 			return
 		}
 
-		claims, err := jwtProvider.Parse(token)
+		claims, err := auth_jwt.Parse(token)
 		if err != nil {
 			t.Errorf("parse error: %v", err)
 			return

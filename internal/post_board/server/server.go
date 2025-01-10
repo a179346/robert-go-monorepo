@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
+	"github.com/a179346/robert-go-monorepo/internal/post_board/middlewares"
 	auth_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_caes/auth"
 	user_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_caes/user"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf"
@@ -15,23 +16,22 @@ import (
 )
 
 type Options struct {
-	AuthedMiddleware gohf.HandlerFunc
-	AuthUseCase      auth_use_case.AuthUseCase
-	UserUseCase      user_use_case.UserUseCase
+	AuthUseCase auth_use_case.AuthUseCase
+	UserUseCase user_use_case.UserUseCase
 }
 
 type Server struct {
 	httpserver *http.Server
 }
 
-func New(config post_board_config.ServerConfig, options Options) *Server {
+func New(options Options) *Server {
 	router := gohf.New()
 
 	options.AuthUseCase.AppendHandler(router.SubRouter("/auth"))
 
 	{
 		authedRouter := router.SubRouter("/authed")
-		authedRouter.Use(options.AuthedMiddleware)
+		authedRouter.Use(middlewares.AuthedMiddleware)
 
 		options.UserUseCase.AppendHandler(authedRouter.SubRouter("/users"))
 	}
@@ -40,7 +40,7 @@ func New(config post_board_config.ServerConfig, options Options) *Server {
 
 	mux := router.CreateServeMux()
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.Port),
+		Addr:    fmt.Sprintf(":%d", post_board_config.GetServerConfig().Port),
 		Handler: cors.AllowAll().Handler(mux),
 	}
 

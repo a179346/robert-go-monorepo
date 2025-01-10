@@ -1,10 +1,11 @@
-package jwt_provider
+package auth_jwt
 
 import (
 	"errors"
 	"fmt"
 	"time"
 
+	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -13,19 +14,9 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-type JwtProvider struct {
-	secret        []byte
-	expireSeconds int
-}
+func Sign(id string) (string, error) {
+	jwtConfig := post_board_config.GetJwtConfig()
 
-func New(secret string, expireSeconds int) JwtProvider {
-	return JwtProvider{
-		secret:        []byte(secret),
-		expireSeconds: expireSeconds,
-	}
-}
-
-func (jwtProvider JwtProvider) Sign(id string) (string, error) {
 	claims := Claims{
 		id,
 		jwt.RegisteredClaims{
@@ -33,20 +24,22 @@ func (jwtProvider JwtProvider) Sign(id string) (string, error) {
 			Subject:   "auth",
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now().Add(-10 * time.Minute)),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(jwtProvider.expireSeconds) * time.Second)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(jwtConfig.ExpireSeconds) * time.Second)),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtProvider.secret)
+	return token.SignedString(jwtConfig.Secret)
 }
 
-func (jwtProvider JwtProvider) Parse(tokenString string) (*Claims, error) {
+func Parse(tokenString string) (*Claims, error) {
+	jwtConfig := post_board_config.GetJwtConfig()
+
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-		return jwtProvider.secret, nil
+		return jwtConfig.Secret, nil
 	})
 
 	if err != nil {

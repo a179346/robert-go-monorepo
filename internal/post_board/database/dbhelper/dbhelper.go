@@ -10,7 +10,9 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func Open(dbConfig post_board_config.DBConfig) (*sql.DB, error) {
+func Open() (*sql.DB, error) {
+	dbConfig := post_board_config.GetDBConfig()
+
 	databaseURL := fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		dbConfig.User,

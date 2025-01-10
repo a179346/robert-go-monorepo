@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	_ "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/database/dbhelper"
 	"github.com/golang-migrate/migrate/v4"
@@ -11,11 +12,10 @@ import (
 )
 
 func main() {
-	config := post_board_config.New()
+	migrationConfig := post_board_config.GetMigrationConfig()
+	sourceURL := "file://" + migrationConfig.FolderPath
 
-	sourceURL := "file://" + config.Migration.FolderPath
-
-	db, err := dbhelper.Open(config.DB)
+	db, err := dbhelper.Open()
 	if err != nil {
 		log.Fatalf("opendb.Open error: %v", err)
 	}
@@ -27,13 +27,13 @@ func main() {
 		log.Fatalf("postgres.WithInstance error: %v", err)
 	}
 
-	m, err := migrate.NewWithDatabaseInstance(sourceURL, config.DB.Database, driver)
+	m, err := migrate.NewWithDatabaseInstance(sourceURL, post_board_config.GetDBConfig().Database, driver)
 	if err != nil {
 		log.Fatalf("migrate.NewWithDatabaseInstance error: %v", err)
 	}
-	m.Log = NewMigationLogger(config.Migration.Verbose)
+	m.Log = NewMigationLogger(migrationConfig.Verbose)
 
-	if config.Migration.Up {
+	if migrationConfig.Up {
 		err = m.Up()
 		if err != nil {
 			if err.Error() == "no change" {

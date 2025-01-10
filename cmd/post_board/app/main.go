@@ -6,10 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
+	_ "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/database/dbhelper"
-	"github.com/a179346/robert-go-monorepo/internal/post_board/middlewares"
-	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/jwt_provider"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/user_provider"
 	post_board_server "github.com/a179346/robert-go-monorepo/internal/post_board/server"
 	auth_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_caes/auth"
@@ -18,9 +16,7 @@ import (
 )
 
 func main() {
-	config := post_board_config.New()
-
-	db, err := dbhelper.Open(config.DB)
+	db, err := dbhelper.Open()
 	if err != nil {
 		log.Fatalf("opendb.Open error: %v", err)
 	}
@@ -28,14 +24,11 @@ func main() {
 	dbhelper.WaitFor(db)
 
 	userProvider := user_provider.New(db)
-	jwtProvider := jwt_provider.New(config.Jwt.Secret, config.Jwt.ExpireSeconds)
 
 	server := post_board_server.New(
-		config.Server,
 		post_board_server.Options{
-			AuthedMiddleware: middlewares.AuthedMiddleware(jwtProvider),
-			AuthUseCase:      auth_use_case.New(userProvider, jwtProvider),
-			UserUseCase:      user_use_case.New(userProvider),
+			AuthUseCase: auth_use_case.New(userProvider),
+			UserUseCase: user_use_case.New(userProvider),
 		},
 	)
 

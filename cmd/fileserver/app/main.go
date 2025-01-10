@@ -6,19 +6,16 @@ import (
 	"net/http"
 	"time"
 
-	fileserver_config "github.com/a179346/robert-go-monorepo/internal/fileserver/config"
+	_ "github.com/a179346/robert-go-monorepo/internal/fileserver/config"
 	fileserver_server "github.com/a179346/robert-go-monorepo/internal/fileserver/server"
 	filestore_use_case "github.com/a179346/robert-go-monorepo/internal/fileserver/use_caes/filestore"
 	"github.com/a179346/robert-go-monorepo/pkg/graceful_shutdown"
 )
 
 func main() {
-	config := fileserver_config.New()
-
 	server := fileserver_server.New(
-		config.Server,
 		fileserver_server.Options{
-			FileStoreUseCase: filestore_use_case.New(config.Storage),
+			FileStoreUseCase: filestore_use_case.New(),
 		},
 	)
 

@@ -21,7 +21,7 @@ type Server struct {
 	httpserver *http.Server
 }
 
-func New(config delay_app_config.ServerConfig, options Options) *Server {
+func New(options Options) *Server {
 	router := gohf.New()
 
 	options.DelayUseCase.AppendHandler(router.SubRouter("/delay"))
@@ -30,7 +30,7 @@ func New(config delay_app_config.ServerConfig, options Options) *Server {
 
 	mux := router.CreateServeMux()
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.Port),
+		Addr:    fmt.Sprintf(":%d", delay_app_config.GetServerConfig().Port),
 		Handler: cors.AllowAll().Handler(mux),
 	}
 

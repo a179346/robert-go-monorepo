@@ -6,17 +6,14 @@ import (
 	"net/http"
 	"time"
 
-	delay_app_config "github.com/a179346/robert-go-monorepo/internal/delay_app/config"
+	_ "github.com/a179346/robert-go-monorepo/internal/delay_app/config"
 	delay_app_server "github.com/a179346/robert-go-monorepo/internal/delay_app/server"
 	delay_use_case "github.com/a179346/robert-go-monorepo/internal/delay_app/use_caes/delay"
 	"github.com/a179346/robert-go-monorepo/pkg/graceful_shutdown"
 )
 
 func main() {
-	config := delay_app_config.New()
-
 	server := delay_app_server.New(
-		config.Server,
 		delay_app_server.Options{
 			DelayUseCase: delay_use_case.New(),
 		},
