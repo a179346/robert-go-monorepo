@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/jwt_provider"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/user_provider"
 	"github.com/a179346/robert-go-monorepo/pkg/cryption"
 	"github.com/go-jet/jet/qrm"
@@ -11,10 +12,14 @@ import (
 
 type authCommands struct {
 	userProvider user_provider.UserProvider
+	jwtProvider  jwt_provider.JwtProvider
 }
 
-func newAuthCommands(userProvider user_provider.UserProvider) authCommands {
-	return authCommands{userProvider: userProvider}
+func newAuthCommands(userProvider user_provider.UserProvider, jwtProvider jwt_provider.JwtProvider) authCommands {
+	return authCommands{
+		userProvider: userProvider,
+		jwtProvider:  jwtProvider,
+	}
 }
 
 var errUserNotFound = errors.New("User not found")
@@ -34,5 +39,5 @@ func (authCommands authCommands) login(ctx context.Context, email string, passwo
 		return "", errWrongPassword
 	}
 
-	return "TODO - jwt", nil
+	return authCommands.jwtProvider.Sign(user.ID.String())
 }

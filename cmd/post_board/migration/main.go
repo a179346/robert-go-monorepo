@@ -4,7 +4,7 @@ import (
 	"log"
 
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
-	"github.com/a179346/robert-go-monorepo/internal/post_board/database/opendb"
+	"github.com/a179346/robert-go-monorepo/internal/post_board/database/dbhelper"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -15,13 +15,12 @@ func main() {
 
 	sourceURL := "file://" + config.Migration.FolderPath
 
-	// TODO - check db connected
-	// TODO - pool ?
-	db, err := opendb.Open(config.DB)
+	db, err := dbhelper.Open(config.DB)
 	if err != nil {
 		log.Fatalf("opendb.Open error: %v", err)
 	}
 	defer db.Close()
+	dbhelper.WaitFor(db)
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {

@@ -31,6 +31,20 @@ func (userProvider UserProvider) FindAll(ctx context.Context) ([]model.User, err
 	return dest, err
 }
 
+func (userProvider UserProvider) FindById(ctx context.Context, id uuid.UUID) (model.User, error) {
+	stmt := SELECT(
+		User.AllColumns,
+	).FROM(
+		User,
+	).WHERE(
+		User.ID.EQ(UUID(id)),
+	).LIMIT(1)
+
+	var dest model.User
+	err := stmt.QueryContext(ctx, userProvider.db, &dest)
+	return dest, err
+}
+
 func (userProvider UserProvider) FindByEmail(ctx context.Context, email string) (model.User, error) {
 	stmt := SELECT(
 		User.AllColumns,

@@ -8,13 +8,16 @@ import (
 
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	auth_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_caes/auth"
+	user_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_caes/user"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/rs/cors"
 )
 
 type Options struct {
-	AuthUseCase auth_use_case.AuthUseCase
+	AuthedMiddleware gohf.HandlerFunc
+	AuthUseCase      auth_use_case.AuthUseCase
+	UserUseCase      user_use_case.UserUseCase
 }
 
 type Server struct {
@@ -25,6 +28,13 @@ func New(config post_board_config.ServerConfig, options Options) *Server {
 	router := gohf.New()
 
 	options.AuthUseCase.AppendHandler(router.SubRouter("/auth"))
+
+	{
+		authedRouter := router.SubRouter("/authed")
+		authedRouter.Use(options.AuthedMiddleware)
+
+		options.UserUseCase.AppendHandler(authedRouter.SubRouter("/users"))
+	}
 
 	router.Use(gohf_extended.NotFoundHandler)
 
