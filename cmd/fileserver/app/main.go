@@ -8,7 +8,7 @@ import (
 
 	_ "github.com/a179346/robert-go-monorepo/internal/fileserver/config"
 	fileserver_server "github.com/a179346/robert-go-monorepo/internal/fileserver/server"
-	filestore_use_case "github.com/a179346/robert-go-monorepo/internal/fileserver/use_caes/filestore"
+	filestore_use_case "github.com/a179346/robert-go-monorepo/internal/fileserver/use_cases/filestore"
 	"github.com/a179346/robert-go-monorepo/pkg/graceful_shutdown"
 )
 

@@ -10,8 +10,8 @@ import (
 	"github.com/a179346/robert-go-monorepo/internal/post_board/database/dbhelper"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/user_provider"
 	post_board_server "github.com/a179346/robert-go-monorepo/internal/post_board/server"
-	auth_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_caes/auth"
-	user_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_caes/user"
+	auth_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/auth"
+	user_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/user"
 	"github.com/a179346/robert-go-monorepo/pkg/graceful_shutdown"
 )
 

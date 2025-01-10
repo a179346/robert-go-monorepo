@@ -8,8 +8,8 @@ import (
 
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/middlewares"
-	auth_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_caes/auth"
-	user_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_caes/user"
+	auth_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/auth"
+	user_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/user"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/rs/cors"

@@ -8,7 +8,7 @@ import (
 
 	_ "github.com/a179346/robert-go-monorepo/internal/delay_app/config"
 	delay_app_server "github.com/a179346/robert-go-monorepo/internal/delay_app/server"
-	delay_use_case "github.com/a179346/robert-go-monorepo/internal/delay_app/use_caes/delay"
+	delay_use_case "github.com/a179346/robert-go-monorepo/internal/delay_app/use_cases/delay"
 	"github.com/a179346/robert-go-monorepo/pkg/graceful_shutdown"
 )
 
