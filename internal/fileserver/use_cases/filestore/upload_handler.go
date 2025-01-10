@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/a179346/robert-go-monorepo/pkg/gohf"
-	"github.com/a179346/robert-go-monorepo/pkg/gohf/gohf_responses"
+	"github.com/gohf-http/gohf"
+	"github.com/gohf-http/gohf/gohf_responses"
 )
 
 func (fs FileStoreUseCase) uploadHandler(c *gohf.Context) gohf.Response {

@@ -1,6 +1,6 @@
 module github.com/a179346/robert-go-monorepo
 
-go 1.23.3
+go 1.23.4
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -10,6 +10,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.23.0 // indirect
+	github.com/gohf-http/gohf v1.0.0 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang-migrate/migrate/v4 v4.18.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/a179346/robert-go-monorepo/pkg/delay_app_client"
-	"github.com/a179346/robert-go-monorepo/pkg/gohf/gohf_responses"
+	"github.com/gohf-http/gohf/gohf_responses"
 )
 
 func TestClient_Delay(t *testing.T) {

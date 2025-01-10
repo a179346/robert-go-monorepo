@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/a179346/robert-go-monorepo/pkg/gohf"
+	"github.com/gohf-http/gohf"
 )
 
 type CutsomJsonResponseData[T interface{}] struct {

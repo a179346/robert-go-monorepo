@@ -8,8 +8,8 @@ import (
 
 	fileserver_config "github.com/a179346/robert-go-monorepo/internal/fileserver/config"
 	filestore_use_case "github.com/a179346/robert-go-monorepo/internal/fileserver/use_cases/filestore"
-	"github.com/a179346/robert-go-monorepo/pkg/gohf"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
+	"github.com/gohf-http/gohf"
 	"github.com/rs/cors"
 )
 

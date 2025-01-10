@@ -10,8 +10,8 @@ import (
 	"github.com/a179346/robert-go-monorepo/internal/post_board/middlewares"
 	auth_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/auth"
 	user_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/user"
-	"github.com/a179346/robert-go-monorepo/pkg/gohf"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
+	"github.com/gohf-http/gohf"
 	"github.com/rs/cors"
 )
 

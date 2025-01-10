@@ -4,10 +4,10 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/a179346/robert-go-monorepo/pkg/gohf"
-	"github.com/a179346/robert-go-monorepo/pkg/gohf/gohf_responses"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/go-playground/validator/v10"
+	"github.com/gohf-http/gohf"
+	"github.com/gohf-http/gohf/gohf_responses"
 )
 
 type loginRequestBody struct {

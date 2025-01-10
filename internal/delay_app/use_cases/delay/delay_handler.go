@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/a179346/robert-go-monorepo/pkg/gohf"
-	"github.com/a179346/robert-go-monorepo/pkg/gohf/gohf_responses"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
+	"github.com/gohf-http/gohf"
+	"github.com/gohf-http/gohf/gohf_responses"
 )
 
 func (u DelayUseCase) delayHandler(c *gohf.Context) gohf.Response {

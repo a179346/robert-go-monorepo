@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/a179346/robert-go-monorepo/pkg/gohf/gohf_responses"
+	"github.com/gohf-http/gohf/gohf_responses"
 )
 
 func HandleResponse[T any](resp *http.Response, responseObject *T) (*T, error) {

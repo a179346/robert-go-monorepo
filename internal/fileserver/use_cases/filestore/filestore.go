@@ -2,7 +2,7 @@ package filestore_use_case
 
 import (
 	fileserver_config "github.com/a179346/robert-go-monorepo/internal/fileserver/config"
-	"github.com/a179346/robert-go-monorepo/pkg/gohf"
+	"github.com/gohf-http/gohf"
 )
 
 type FileStoreUseCase struct {
