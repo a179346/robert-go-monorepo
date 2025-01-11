@@ -6,8 +6,8 @@ import (
 
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/go-playground/validator/v10"
-	"github.com/gohf-http/gohf"
-	"github.com/gohf-http/gohf/gohf_responses"
+	"github.com/gohf-http/gohf/v2"
+	"github.com/gohf-http/gohf/v2/gohf_responses"
 )
 
 type loginRequestBody struct {

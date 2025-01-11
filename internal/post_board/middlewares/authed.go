@@ -6,8 +6,8 @@ import (
 
 	"github.com/a179346/robert-go-monorepo/internal/post_board/shared/auth_jwt"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/shared/authed_context"
-	"github.com/gohf-http/gohf"
-	"github.com/gohf-http/gohf/gohf_responses"
+	"github.com/gohf-http/gohf/v2"
+	"github.com/gohf-http/gohf/v2/gohf_responses"
 )
 
 func AuthedMiddleware(c *gohf.Context) gohf.Response {

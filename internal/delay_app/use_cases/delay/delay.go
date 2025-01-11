@@ -1,7 +1,7 @@
 package delay_use_case
 
 import (
-	"github.com/gohf-http/gohf"
+	"github.com/gohf-http/gohf/v2"
 )
 
 type DelayUseCase struct {
