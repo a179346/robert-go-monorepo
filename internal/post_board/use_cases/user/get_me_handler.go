@@ -7,8 +7,8 @@ import (
 
 	"github.com/a179346/robert-go-monorepo/internal/post_board/shared/authed_context"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
-	"github.com/gohf-http/gohf/v2"
-	"github.com/gohf-http/gohf/v2/gohf_responses"
+	"github.com/gohf-http/gohf/v3"
+	"github.com/gohf-http/gohf/v3/gohf_responses"
 )
 
 type getMeResponseBody struct {
