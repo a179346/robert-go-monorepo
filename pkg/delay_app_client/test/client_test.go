@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/a179346/robert-go-monorepo/pkg/delay_app_client"
-	"github.com/gohf-http/gohf/v4/gohf_responses"
+	"github.com/gohf-http/gohf/v5/gohf_responses"
 )
 
 func TestClient_Delay(t *testing.T) {
@@ -44,7 +44,7 @@ func TestClient_Delay(t *testing.T) {
 			return
 		}
 
-		e, ok := err.(gohf_responses.ErrorResponse[any])
+		e, ok := err.(gohf_responses.ErrorResponse)
 		if !ok {
 			t.Error("error should be of type ErrorResponse")
 			return

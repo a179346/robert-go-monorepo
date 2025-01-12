@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gohf-http/gohf/v4"
-	"github.com/gohf-http/gohf/v4/gohf_responses"
+	"github.com/gohf-http/gohf/v5"
+	"github.com/gohf-http/gohf/v5/gohf_responses"
 )
 
 func main() {

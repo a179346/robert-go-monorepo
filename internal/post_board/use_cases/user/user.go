@@ -2,7 +2,7 @@ package user_use_case
 
 import (
 	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/user_provider"
-	"github.com/gohf-http/gohf/v4"
+	"github.com/gohf-http/gohf/v5"
 )
 
 type UserUseCase struct {
