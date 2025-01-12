@@ -6,7 +6,7 @@ require (
 	github.com/go-jet/jet v2.3.0+incompatible
 	github.com/go-jet/jet/v2 v2.12.0
 	github.com/go-playground/validator/v10 v10.23.0
-	github.com/gohf-http/gohf/v4 v4.1.0
+	github.com/gohf-http/gohf/v4 v4.2.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/google/uuid v1.6.0

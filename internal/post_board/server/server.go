@@ -9,6 +9,7 @@ import (
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/middlewares"
 	auth_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/auth"
+	post_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/post"
 	user_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/user"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/gohf-http/gohf/v4"
@@ -18,6 +19,7 @@ import (
 type Options struct {
 	AuthUseCase auth_use_case.AuthUseCase
 	UserUseCase user_use_case.UserUseCase
+	PostUseCase post_use_case.PostUseCase
 }
 
 type Server struct {
@@ -34,6 +36,7 @@ func New(options Options) *Server {
 		authedRouter.Use(middlewares.AuthedMiddleware)
 
 		options.UserUseCase.AppendHandler(authedRouter.SubRouter("/users"))
+		options.PostUseCase.AppendHandler(authedRouter.SubRouter("/posts"))
 	}
 
 	router.Use(gohf_extended.NotFoundHandler)
