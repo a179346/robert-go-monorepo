@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gohf-http/gohf/v3/gohf_responses"
+	"github.com/gohf-http/gohf/v4/gohf_responses"
 )
 
 func HandleResponse[T any](resp *http.Response, responseObject *T) (*T, error) {

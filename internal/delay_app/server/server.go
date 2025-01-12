@@ -9,7 +9,7 @@ import (
 	delay_app_config "github.com/a179346/robert-go-monorepo/internal/delay_app/config"
 	delay_use_case "github.com/a179346/robert-go-monorepo/internal/delay_app/use_cases/delay"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
-	"github.com/gohf-http/gohf/v3"
+	"github.com/gohf-http/gohf/v4"
 	"github.com/rs/cors"
 )
 

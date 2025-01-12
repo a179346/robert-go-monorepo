@@ -38,3 +38,12 @@ func (userQueries userQueries) findUserById(ctx context.Context, userId string) 
 
 	return user, nil
 }
+
+func (userQueries userQueries) findAllUsers(ctx context.Context) ([]model.User, error) {
+	users, err := userQueries.userProvider.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}

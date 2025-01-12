@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
-	"github.com/gohf-http/gohf/v3"
-	"github.com/gohf-http/gohf/v3/gohf_responses"
+	"github.com/gohf-http/gohf/v4"
+	"github.com/gohf-http/gohf/v4/gohf_responses"
 )
 
 func (u DelayUseCase) delayHandler(c *gohf.Context) gohf.Response {

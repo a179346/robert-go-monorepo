@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/http"
 
-	"github.com/gohf-http/gohf/v3"
+	"github.com/gohf-http/gohf/v4"
 )
 
 type CutsomJsonResponseData[T interface{}] struct {
@@ -24,12 +25,13 @@ func NewCustomJsonResponse[T interface{}](statusCode int, data T) CutsomJsonResp
 	}
 }
 
-func (response CutsomJsonResponse[T]) Send(res gohf.ResponseWriter, req *gohf.Request) {
+func (res CutsomJsonResponse[T]) Send(w http.ResponseWriter, req *gohf.Request) {
 	if errors.Is(req.RootContext().Err(), context.Canceled) {
 		return
 	}
 
-	res.SetHeader("Content-Type", "application/json")
-	res.SetStatus(response.Status)
-	json.NewEncoder(res).Encode(response.Data)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(res.Status)
+	//nolint:errcheck
+	json.NewEncoder(w).Encode(res.Data)
 }
