@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
-	"github.com/gohf-http/gohf/v5"
-	"github.com/gohf-http/gohf/v5/gohf_responses"
+	"github.com/gohf-http/gohf/v6"
+	"github.com/gohf-http/gohf/v6/response"
 )
 
 type author struct {
@@ -31,7 +31,7 @@ type getPostsResponseBody []getPostElement
 func (u PostUseCase) getPostsHandler(c *gohf.Context) gohf.Response {
 	posts, err := u.postQueries.find(c.Req.Context(), c.Req.GetQuery("authorId"))
 	if err != nil {
-		return gohf_responses.NewErrorResponse(
+		return response.Error(
 			http.StatusInternalServerError,
 			errors.New("Something went wrong"),
 		)

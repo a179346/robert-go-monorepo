@@ -6,28 +6,28 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gohf-http/gohf/v5"
-	"github.com/gohf-http/gohf/v5/gohf_responses"
+	"github.com/gohf-http/gohf/v6"
+	"github.com/gohf-http/gohf/v6/response"
 )
 
 func main() {
 	router := gohf.New()
 
-	router.Handle("GET /greeting", func(c *gohf.Context) gohf.Response {
+	router.GET("/greeting", func(c *gohf.Context) gohf.Response {
 		name := c.Req.GetQuery("name")
 		if name == "" {
-			return gohf_responses.NewErrorResponse(
+			return response.Error(
 				http.StatusBadRequest,
 				errors.New("Name is required"),
 			)
 		}
 
 		greeting := fmt.Sprintf("Hello, %s!", name)
-		return gohf_responses.NewTextResponse(http.StatusOK, greeting)
+		return response.Text(http.StatusOK, greeting)
 	})
 
 	router.Use(func(c *gohf.Context) gohf.Response {
-		return gohf_responses.NewErrorResponse(
+		return response.Error(
 			http.StatusNotFound,
 			errors.New("Page not found"),
 		)

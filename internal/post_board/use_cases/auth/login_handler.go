@@ -6,8 +6,8 @@ import (
 
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/go-playground/validator/v10"
-	"github.com/gohf-http/gohf/v5"
-	"github.com/gohf-http/gohf/v5/gohf_responses"
+	"github.com/gohf-http/gohf/v6"
+	"github.com/gohf-http/gohf/v6/response"
 )
 
 type loginRequestBody struct {
@@ -20,7 +20,7 @@ func (u AuthUseCase) loginHandler(c *gohf.Context) gohf.Response {
 
 	defer c.Req.GetBody().Close()
 	if err := c.Req.GetBody().JsonDecode(&body); err != nil {
-		return gohf_responses.NewErrorResponse(
+		return response.Error(
 			http.StatusBadRequest,
 			err,
 		)
@@ -28,7 +28,7 @@ func (u AuthUseCase) loginHandler(c *gohf.Context) gohf.Response {
 
 	validate := validator.New()
 	if err := validate.Struct(body); err != nil {
-		return gohf_responses.NewErrorResponse(
+		return response.Error(
 			http.StatusBadRequest,
 			err,
 		)
@@ -37,12 +37,12 @@ func (u AuthUseCase) loginHandler(c *gohf.Context) gohf.Response {
 	token, err := u.authCommands.login(c.Req.Context(), body.Email, body.Password)
 	if err != nil {
 		if errors.Is(err, errUserNotFound) || errors.Is(err, errWrongPassword) {
-			return gohf_responses.NewErrorResponse(
+			return response.Error(
 				http.StatusNotFound,
 				errors.New("User not found"),
 			)
 		}
-		return gohf_responses.NewErrorResponse(
+		return response.Error(
 			http.StatusInternalServerError,
 			errors.New("Something went wrong"),
 		)

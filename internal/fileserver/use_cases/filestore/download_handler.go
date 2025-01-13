@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gohf-http/gohf/v5"
-	"github.com/gohf-http/gohf/v5/gohf_responses"
+	"github.com/gohf-http/gohf/v6"
+	"github.com/gohf-http/gohf/v6/response"
 )
 
 var ErrFileNotFound = errors.New("file not found")
@@ -16,11 +16,11 @@ func (fs FileStoreUseCase) downloadHandler(c *gohf.Context) gohf.Response {
 	filepath, err := fs.fileStoreQueries.download(filename)
 	if err != nil {
 		if errors.Is(err, ErrFileNotFound) {
-			return gohf_responses.NewErrorResponse(http.StatusNotFound, err)
+			return response.Error(http.StatusNotFound, err)
 		}
-		return gohf_responses.NewErrorResponse(http.StatusInternalServerError, errors.New("Something went wrong"))
+		return response.Error(http.StatusInternalServerError, errors.New("Something went wrong"))
 	}
 
 	c.ResHeader().Set("Content-Disposition", "attachment; filename="+strconv.Quote(filename))
-	return gohf_responses.NewServeFileResponse(filepath)
+	return response.ServeFile(filepath)
 }

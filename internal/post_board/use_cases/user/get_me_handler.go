@@ -7,8 +7,8 @@ import (
 
 	"github.com/a179346/robert-go-monorepo/internal/post_board/shared/authed_context"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
-	"github.com/gohf-http/gohf/v5"
-	"github.com/gohf-http/gohf/v5/gohf_responses"
+	"github.com/gohf-http/gohf/v6"
+	"github.com/gohf-http/gohf/v6/response"
 )
 
 type getMeResponseBody struct {
@@ -22,7 +22,7 @@ type getMeResponseBody struct {
 func (u UserUseCase) getMeHandler(c *gohf.Context) gohf.Response {
 	userId, ok := authed_context.Value(c.Req.Context())
 	if !ok {
-		return gohf_responses.NewErrorResponse(
+		return response.Error(
 			http.StatusInternalServerError,
 			errors.New("Something went wrong"),
 		)
@@ -31,12 +31,12 @@ func (u UserUseCase) getMeHandler(c *gohf.Context) gohf.Response {
 	user, err := u.userQueries.findUserById(c.Req.Context(), userId)
 	if err != nil {
 		if errors.Is(err, errUserNotFound) {
-			return gohf_responses.NewErrorResponse(
+			return response.Error(
 				http.StatusUnauthorized,
 				errors.New("User not found"),
 			)
 		}
-		return gohf_responses.NewErrorResponse(
+		return response.Error(
 			http.StatusInternalServerError,
 			errors.New("Something went wrong"),
 		)

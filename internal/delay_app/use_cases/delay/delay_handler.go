@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
-	"github.com/gohf-http/gohf/v5"
-	"github.com/gohf-http/gohf/v5/gohf_responses"
+	"github.com/gohf-http/gohf/v6"
+	"github.com/gohf-http/gohf/v6/response"
 )
 
 func (u DelayUseCase) delayHandler(c *gohf.Context) gohf.Response {
@@ -17,14 +17,14 @@ func (u DelayUseCase) delayHandler(c *gohf.Context) gohf.Response {
 
 	ms, err := strconv.Atoi(delayMs)
 	if err != nil {
-		return gohf_responses.NewErrorResponse(
+		return response.Error(
 			http.StatusBadRequest,
 			fmt.Errorf("Invalid delay: %s", delayMs),
 		)
 	}
 
 	if ms < 0 || ms > 60000 {
-		return gohf_responses.NewErrorResponse(
+		return response.Error(
 			http.StatusBadRequest,
 			errors.New("Delay ms should be 0 ~ 60000"),
 		)
@@ -32,7 +32,7 @@ func (u DelayUseCase) delayHandler(c *gohf.Context) gohf.Response {
 
 	data, err := u.delayQueries.getResult(c.Req.Context(), ms, d)
 	if err != nil {
-		return gohf_responses.NewErrorResponse(
+		return response.Error(
 			http.StatusInternalServerError,
 			errors.New("Something went wrong"),
 		)

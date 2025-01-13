@@ -8,8 +8,8 @@ import (
 	"github.com/a179346/robert-go-monorepo/internal/post_board/shared/authed_context"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/go-playground/validator/v10"
-	"github.com/gohf-http/gohf/v5"
-	"github.com/gohf-http/gohf/v5/gohf_responses"
+	"github.com/gohf-http/gohf/v6"
+	"github.com/gohf-http/gohf/v6/response"
 )
 
 type createPostRequestBody struct {
@@ -19,7 +19,7 @@ type createPostRequestBody struct {
 func (u PostUseCase) createPostHandler(c *gohf.Context) gohf.Response {
 	authorId, ok := authed_context.Value(c.Req.Context())
 	if !ok {
-		return gohf_responses.NewErrorResponse(
+		return response.Error(
 			http.StatusInternalServerError,
 			errors.New("Something went wrong"),
 		)
@@ -29,7 +29,7 @@ func (u PostUseCase) createPostHandler(c *gohf.Context) gohf.Response {
 
 	defer c.Req.GetBody().Close()
 	if err := c.Req.GetBody().JsonDecode(&body); err != nil {
-		return gohf_responses.NewErrorResponse(
+		return response.Error(
 			http.StatusBadRequest,
 			err,
 		)
@@ -37,7 +37,7 @@ func (u PostUseCase) createPostHandler(c *gohf.Context) gohf.Response {
 
 	validate := validator.New()
 	if err := validate.Struct(body); err != nil {
-		return gohf_responses.NewErrorResponse(
+		return response.Error(
 			http.StatusBadRequest,
 			err,
 		)
@@ -49,7 +49,7 @@ func (u PostUseCase) createPostHandler(c *gohf.Context) gohf.Response {
 		body.Content,
 	)
 	if err != nil {
-		return gohf_responses.NewErrorResponse(
+		return response.Error(
 			http.StatusInternalServerError,
 			errors.New("Something went wrong"),
 		)

@@ -4,12 +4,12 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/gohf-http/gohf/v5"
-	"github.com/gohf-http/gohf/v5/gohf_responses"
+	"github.com/gohf-http/gohf/v6"
+	"github.com/gohf-http/gohf/v6/response"
 )
 
 func NotFoundHandler(c *gohf.Context) gohf.Response {
-	return gohf_responses.NewErrorResponse(
+	return response.Error(
 		http.StatusNotFound,
 		errors.New("Not found"),
 	)
