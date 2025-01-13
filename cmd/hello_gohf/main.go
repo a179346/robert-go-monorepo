@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -22,8 +21,9 @@ func main() {
 			)
 		}
 
-		greeting := fmt.Sprintf("Hello, %s!", name)
-		return response.Text(http.StatusOK, greeting)
+		return response.JSON(http.StatusOK, map[string]string{
+			"Hello": name,
+		})
 	})
 
 	router.Use(func(c *gohf.Context) gohf.Response {
