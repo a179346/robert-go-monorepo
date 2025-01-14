@@ -29,6 +29,8 @@ type Server struct {
 func New(options Options) *Server {
 	router := gohf.New()
 
+	router.Use(gohf.MaxBytesMiddleware(5 * 1024 * 1024))
+
 	options.AuthUseCase.AppendHandler(router.SubRouter("/auth"))
 
 	{

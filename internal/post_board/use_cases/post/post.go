@@ -18,6 +18,6 @@ func New(postProvider post_provider.PostProvider) PostUseCase {
 }
 
 func (u PostUseCase) AppendHandler(router *gohf.Router) {
-	router.Handle("GET /", u.getPostsHandler)
-	router.Handle("POST /", u.createPostHandler)
+	router.GET("/", u.getPostsHandler)
+	router.POST("/", u.createPostHandler)
 }

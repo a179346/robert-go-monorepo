@@ -24,6 +24,8 @@ type Server struct {
 func New(options Options) *Server {
 	router := gohf.New()
 
+	router.Use(gohf.MaxBytesMiddleware(5 * 1024 * 1024))
+
 	options.FileStoreUseCase.AppendHandler(router.SubRouter("/filestore"))
 
 	router.Use(gohf_extended.NotFoundHandler)

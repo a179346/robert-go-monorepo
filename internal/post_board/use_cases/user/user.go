@@ -18,7 +18,7 @@ func New(userProvider user_provider.UserProvider) UserUseCase {
 }
 
 func (u UserUseCase) AppendHandler(router *gohf.Router) {
-	router.Handle("GET /me", u.getMeHandler)
-	router.Handle("GET /", u.getAllUsersHandler)
-	router.Handle("POST /", u.createUserHandler)
+	router.GET("/me", u.getMeHandler)
+	router.GET("/", u.getAllUsersHandler)
+	router.POST("/", u.createUserHandler)
 }

@@ -20,6 +20,6 @@ func New() FileStoreUseCase {
 }
 
 func (filestore FileStoreUseCase) AppendHandler(router *gohf.Router) {
-	router.Handle("GET /download", filestore.downloadHandler)
-	router.Handle("POST /upload/{id}", filestore.uploadHandler)
+	router.GET("/download", filestore.downloadHandler)
+	router.POST("/upload/{id}", filestore.uploadHandler)
 }

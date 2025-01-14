@@ -16,5 +16,5 @@ func New(userProvider user_provider.UserProvider) AuthUseCase {
 }
 
 func (u AuthUseCase) AppendHandler(router *gohf.Router) {
-	router.Handle("POST /login", u.loginHandler)
+	router.POST("/login", u.loginHandler)
 }

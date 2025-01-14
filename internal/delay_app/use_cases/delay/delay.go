@@ -15,5 +15,5 @@ func New() DelayUseCase {
 }
 
 func (u DelayUseCase) AppendHandler(router *gohf.Router) {
-	router.Handle("GET /{ms}", u.delayHandler)
+	router.GET("/{ms}", u.delayHandler)
 }
