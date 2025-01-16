@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,6 +10,7 @@ import (
 	_ "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/database/dbhelper"
+	"github.com/a179346/robert-go-monorepo/pkg/logger"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -19,7 +19,7 @@ import (
 func main() {
 	ctx := context.Background()
 	if err := run(ctx); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
+		logger.Errorf("%s", err)
 		os.Exit(1)
 	}
 }
@@ -55,7 +55,7 @@ func run(ctx context.Context) error {
 
 	go func() {
 		<-ctx.Done()
-		log.Println("Gracefully shutting down ...")
+		logger.Info("Gracefully shutting down ...")
 		m.GracefulStop <- true
 	}()
 
@@ -82,10 +82,10 @@ func NewMigationLogger(verbose bool) MigationLogger {
 	return MigationLogger{verbose}
 }
 
-func (logger MigationLogger) Printf(format string, v ...interface{}) {
-	log.Printf(format, v...)
+func (log MigationLogger) Printf(format string, v ...interface{}) {
+	logger.Infof(format, v...)
 }
 
-func (logger MigationLogger) Verbose() bool {
-	return logger.verbose
+func (log MigationLogger) Verbose() bool {
+	return log.verbose
 }

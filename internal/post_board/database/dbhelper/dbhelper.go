@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"time"
 
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
+	"github.com/a179346/robert-go-monorepo/pkg/logger"
 	_ "github.com/lib/pq"
 )
 
@@ -37,7 +37,7 @@ func WaitFor(ctx context.Context, db *sql.DB) {
 			if err == nil {
 				return
 			}
-			log.Printf("connecting to database: %v", err)
+			logger.Warnf("connecting to database: %v", err)
 			time.Sleep(2 * time.Second)
 		}
 	}
