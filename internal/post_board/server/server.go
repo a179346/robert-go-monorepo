@@ -31,6 +31,8 @@ func New(options Options) *Server {
 
 	router.Use(gohf.MaxBytesMiddleware(5 * 1024 * 1024))
 
+	router.GET("/healthz", gohf_extended.HealthzMiddleware)
+
 	options.AuthUseCase.AppendHandler(router.SubRouter("/auth"))
 
 	{

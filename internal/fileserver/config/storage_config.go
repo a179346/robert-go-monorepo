@@ -7,7 +7,6 @@ import (
 )
 
 type StorageConfig struct {
-	isInited      bool
 	RootPath      string
 	StoreRootPath string
 }
@@ -15,17 +14,12 @@ type StorageConfig struct {
 var storageConfig StorageConfig
 
 func initStorageConfig() {
-	if storageConfig.isInited {
-		return
-	}
 	storageConfig.RootPath = env_helper.GetStringEnv("STORAGE_ROOT_PATH", "./storage/fileserver")
 
 	storageConfig.StoreRootPath = filepath.Join(storageConfig.RootPath, "store")
-
-	storageConfig.isInited = true
 }
 
 func GetStorageConfig() StorageConfig {
-	initStorageConfig()
+	initAll()
 	return storageConfig
 }

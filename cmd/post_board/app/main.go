@@ -23,7 +23,7 @@ func main() {
 		log.Fatalf("opendb.Open error: %v", err)
 	}
 	db.SetMaxOpenConns(30)
-	dbhelper.WaitFor(db)
+	dbhelper.WaitFor(context.Background(), db)
 
 	userProvider := user_provider.New(db)
 	postProvider := post_provider.New(db)

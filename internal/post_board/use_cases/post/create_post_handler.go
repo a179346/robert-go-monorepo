@@ -7,7 +7,7 @@ import (
 
 	"github.com/a179346/robert-go-monorepo/internal/post_board/shared/authed_context"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
-	"github.com/go-playground/validator/v10"
+	"github.com/a179346/robert-go-monorepo/pkg/jsonvalidator"
 	"github.com/gohf-http/gohf/v6"
 	"github.com/gohf-http/gohf/v6/response"
 )
@@ -25,25 +25,15 @@ func (u PostUseCase) createPostHandler(c *gohf.Context) gohf.Response {
 		)
 	}
 
-	var body createPostRequestBody
-
-	defer c.Req.GetBody().Close()
-	if err := c.Req.GetBody().JsonDecode(&body); err != nil {
+	body, err := jsonvalidator.Validate[createPostRequestBody](c.Req.GetBody())
+	if err != nil {
 		return response.Error(
 			http.StatusBadRequest,
 			err,
 		)
 	}
 
-	validate := validator.New()
-	if err := validate.Struct(body); err != nil {
-		return response.Error(
-			http.StatusBadRequest,
-			err,
-		)
-	}
-
-	err := u.postCommands.createPost(
+	err = u.postCommands.createPost(
 		context.Background(),
 		authorId,
 		body.Content,

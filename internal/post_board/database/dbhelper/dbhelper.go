@@ -1,6 +1,7 @@
 package dbhelper
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -25,13 +26,19 @@ func Open() (*sql.DB, error) {
 	return sql.Open("postgres", databaseURL)
 }
 
-func WaitFor(db *sql.DB) {
+func WaitFor(ctx context.Context, db *sql.DB) {
 	for {
-		_, err := db.Query("SELECT 1")
-		if err == nil {
+		select {
+		case <-ctx.Done():
 			return
+
+		default:
+			_, err := db.Query("SELECT 1")
+			if err == nil {
+				return
+			}
+			log.Printf("connecting to database: %v", err)
+			time.Sleep(2 * time.Second)
 		}
-		log.Printf("connecting to database: %v", err)
-		time.Sleep(2 * time.Second)
 	}
 }

@@ -1,7 +1,12 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	_ "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
@@ -12,43 +17,61 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
+	if err := run(ctx); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+}
+
+func run(ctx context.Context) error {
+	ctx, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
+
 	migrationConfig := post_board_config.GetMigrationConfig()
 	sourceURL := "file://" + migrationConfig.FolderPath
 
 	db, err := dbhelper.Open()
 	if err != nil {
-		log.Fatalf("opendb.Open error: %v", err)
+		return fmt.Errorf("opendb.Open error: %w", err)
 	}
 	defer db.Close()
-	dbhelper.WaitFor(db)
+
+	dbhelper.WaitFor(ctx, db)
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		log.Fatalf("postgres.WithInstance error: %v", err)
+		return fmt.Errorf("postgres.WithInstance error: %w", err)
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(sourceURL, post_board_config.GetDBConfig().Database, driver)
 	if err != nil {
-		log.Fatalf("migrate.NewWithDatabaseInstance error: %v", err)
+		return fmt.Errorf("migrate.NewWithDatabaseInstance error: %w", err)
 	}
 	m.Log = NewMigationLogger(migrationConfig.Verbose)
 
+	go func() {
+		<-ctx.Done()
+		log.Println("Gracefully shutting down ...")
+		m.GracefulStop <- true
+	}()
+
 	if migrationConfig.Up {
 		err = m.Up()
-		if err != nil {
-			if err.Error() == "no change" {
-				log.Println("No change")
-				return
-			}
-
-			log.Fatalf("m.Up error: %v", err)
+		if err != nil && err.Error() != "no change" {
+			return fmt.Errorf("m.Up error: %w", err)
 		}
 	} else {
 		err = m.Steps(-1)
 		if err != nil {
-			log.Fatalf("m.Steps(-1) error: %v", err)
+			return fmt.Errorf("m.Steps(-1) error: %w", err)
 		}
 	}
+
+	return ctx.Err()
 }
 
 type MigationLogger struct {
