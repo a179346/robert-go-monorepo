@@ -25,6 +25,8 @@ func log(w http.ResponseWriter, req *gohf.Request, status int, body interface{},
 
 	type tjson map[string]interface{}
 
+	bodyBytes, _ := BodyValue(req.Context())
+
 	content := tjson{
 		"unixMilli": req.GetTimestamp().UnixMilli(),
 		"time":      req.GetTimestamp().Format(time.RFC3339),
@@ -32,13 +34,14 @@ func log(w http.ResponseWriter, req *gohf.Request, status int, body interface{},
 			"uri":    req.RequestURI(),
 			"method": req.Method(),
 			"header": req.GetHttpRequest().Header,
-			"body":   req.GetBody(),
+			"body":   string(bodyBytes),
 		},
 		"res": tjson{
 			"header": w.Header(),
 			"status": status,
 			"body":   body,
 		},
+		// TODO it's empty
 		"err": err,
 	}
 

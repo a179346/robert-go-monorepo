@@ -25,8 +25,9 @@ func New(options Options) *Server {
 	router := gohf.New()
 
 	router.Use(gohf.MaxBytesMiddleware(5 * 1024 * 1024))
+	router.Use(gohf_extended.ReadBodyMiddleware)
 
-	router.GET("/healthz", gohf_extended.HealthzMiddleware)
+	router.GET("/healthz", gohf_extended.HealthzHandler)
 
 	options.FileStoreUseCase.AppendHandler(router.SubRouter("/filestore"))
 

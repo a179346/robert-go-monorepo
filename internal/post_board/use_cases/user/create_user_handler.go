@@ -17,7 +17,15 @@ type createUserRequestBody struct {
 }
 
 func (u UserUseCase) createUserHandler(c *gohf.Context) gohf.Response {
-	body, err := jsonvalidator.Validate[createUserRequestBody](c.Req.GetBody())
+	bytes, ok := gohf_extended.BodyValue(c.Req.Context())
+	if !ok {
+		return gohf_extended.NewErrorResponse(
+			http.StatusInternalServerError,
+			errors.New("Something went wrong"),
+		)
+	}
+
+	body, err := jsonvalidator.FromBytes[createUserRequestBody](bytes)
 	if err != nil {
 		return gohf_extended.NewErrorResponse(
 			http.StatusBadRequest,
