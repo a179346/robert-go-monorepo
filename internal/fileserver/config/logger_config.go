@@ -15,7 +15,7 @@ var loggerConfig LoggerConfig
 
 func initLoggerConfig() {
 	loggerConfig.Enable = env_helper.GetBoolEnv("LOGGER_ENABLE", true)
-	loggerConfig.Filename = env_helper.GetStringEnv("LOGGER_FILEANME", "./logs/fileserver/app/req-res.log")
+	loggerConfig.Filename = env_helper.GetStringEnv("LOGGER_FILEANME", "./logs/fileserver/app/requests.log")
 	loggerConfig.MaxSizeMBs = env_helper.GetIntEnv("LOGGER_MAX_SIZE_MBS", 50)
 	loggerConfig.MaxBackups = env_helper.GetIntEnv("LOGGER_MAX_BACKUPS", 3)
 	loggerConfig.MaxAgeDays = env_helper.GetIntEnv("LOGGER_MAX_AGE_DAYS", 30)
