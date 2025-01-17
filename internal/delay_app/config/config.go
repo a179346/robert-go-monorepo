@@ -6,6 +6,7 @@ var once sync.Once
 
 func initAll() {
 	once.Do(func() {
+		initLoggerConfig()
 		initServerConfig()
 	})
 }
