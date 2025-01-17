@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/gohf-http/gohf/v6"
 	"github.com/gohf-http/gohf/v6/response"
 )
@@ -16,9 +17,9 @@ func (fs FileStoreUseCase) downloadHandler(c *gohf.Context) gohf.Response {
 	filepath, err := fs.fileStoreQueries.download(filename)
 	if err != nil {
 		if errors.Is(err, ErrFileNotFound) {
-			return response.Error(http.StatusNotFound, err)
+			return gohf_extended.NewErrorResponse(http.StatusNotFound, err)
 		}
-		return response.Error(http.StatusInternalServerError, errors.New("Something went wrong"))
+		return gohf_extended.NewErrorResponse(http.StatusInternalServerError, errors.New("Something went wrong"))
 	}
 
 	c.ResHeader().Set("Content-Disposition", "attachment; filename="+strconv.Quote(filename))

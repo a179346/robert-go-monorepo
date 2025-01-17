@@ -7,7 +7,6 @@ import (
 
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/gohf-http/gohf/v6"
-	"github.com/gohf-http/gohf/v6/response"
 )
 
 type getAllUsersElement struct {
@@ -23,7 +22,7 @@ type getAllUsersResponseBody []getAllUsersElement
 func (u UserUseCase) getAllUsersHandler(c *gohf.Context) gohf.Response {
 	users, err := u.userQueries.findAllUsers(c.Req.Context())
 	if err != nil {
-		return response.Error(
+		return gohf_extended.NewErrorResponse(
 			http.StatusInternalServerError,
 			errors.New("Something went wrong"),
 		)

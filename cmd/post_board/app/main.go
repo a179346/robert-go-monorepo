@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	post_board_applogger "github.com/a179346/robert-go-monorepo/internal/post_board/applogger"
 	_ "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/database/dbhelper"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/post_provider"
@@ -14,11 +15,17 @@ import (
 	auth_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/auth"
 	post_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/post"
 	user_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/user"
+	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/a179346/robert-go-monorepo/pkg/graceful_shutdown"
 	"github.com/a179346/robert-go-monorepo/pkg/logger"
 )
 
 func main() {
+	appLogger := post_board_applogger.GetFlushLogger()
+	if appLogger != nil {
+		gohf_extended.SetLogger(appLogger)
+	}
+
 	db, err := dbhelper.Open()
 	if err != nil {
 		logger.Errorf("opendb.Open error: %v", err)
@@ -47,15 +54,23 @@ func main() {
 
 	signal := <-graceful_shutdown.ShutDown()
 	logger.Infof("Received signal: %v", signal)
-	logger.Info("Shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
 
+	logger.Info("Shutting down server...")
 	if err := server.Shutdown(ctx); err != nil {
 		logger.Errorf("Error shutting down server: %v", err)
 	}
+
+	logger.Info("Shutting down db...")
 	db.Close()
+
+	if appLogger != nil {
+		logger.Info("Shutting down app logger...")
+		time.Sleep(2 * time.Second)
+		appLogger.Close(ctx)
+	}
 
 	logger.Info("Server shut down successfully")
 }

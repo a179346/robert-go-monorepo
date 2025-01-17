@@ -8,7 +8,6 @@ import (
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/a179346/robert-go-monorepo/pkg/jsonvalidator"
 	"github.com/gohf-http/gohf/v6"
-	"github.com/gohf-http/gohf/v6/response"
 )
 
 type createUserRequestBody struct {
@@ -20,7 +19,7 @@ type createUserRequestBody struct {
 func (u UserUseCase) createUserHandler(c *gohf.Context) gohf.Response {
 	body, err := jsonvalidator.Validate[createUserRequestBody](c.Req.GetBody())
 	if err != nil {
-		return response.Error(
+		return gohf_extended.NewErrorResponse(
 			http.StatusBadRequest,
 			err,
 		)
@@ -34,13 +33,13 @@ func (u UserUseCase) createUserHandler(c *gohf.Context) gohf.Response {
 	)
 	if err != nil {
 		if errors.Is(err, errDuplicatedEmail) {
-			return response.Error(
+			return gohf_extended.NewErrorResponse(
 				http.StatusConflict,
 				err,
 			)
 		}
 
-		return response.Error(
+		return gohf_extended.NewErrorResponse(
 			http.StatusInternalServerError,
 			errors.New("Something went wrong"),
 		)

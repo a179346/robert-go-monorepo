@@ -10,6 +10,7 @@ func initAll() {
 	once.Do(func() {
 		initDBConfig()
 		initJwtConfig()
+		initLoggerConfig()
 		initMigrationConfig()
 		initServerConfig()
 	})

@@ -7,7 +7,6 @@ import (
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/a179346/robert-go-monorepo/pkg/jsonvalidator"
 	"github.com/gohf-http/gohf/v6"
-	"github.com/gohf-http/gohf/v6/response"
 )
 
 type loginRequestBody struct {
@@ -18,7 +17,7 @@ type loginRequestBody struct {
 func (u AuthUseCase) loginHandler(c *gohf.Context) gohf.Response {
 	body, err := jsonvalidator.Validate[loginRequestBody](c.Req.GetBody())
 	if err != nil {
-		return response.Error(
+		return gohf_extended.NewErrorResponse(
 			http.StatusBadRequest,
 			err,
 		)
@@ -27,12 +26,12 @@ func (u AuthUseCase) loginHandler(c *gohf.Context) gohf.Response {
 	token, err := u.authCommands.login(c.Req.Context(), body.Email, body.Password)
 	if err != nil {
 		if errors.Is(err, errUserNotFound) || errors.Is(err, errWrongPassword) {
-			return response.Error(
+			return gohf_extended.NewErrorResponse(
 				http.StatusNotFound,
 				errors.New("User not found"),
 			)
 		}
-		return response.Error(
+		return gohf_extended.NewErrorResponse(
 			http.StatusInternalServerError,
 			errors.New("Something went wrong"),
 		)

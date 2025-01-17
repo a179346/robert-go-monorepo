@@ -9,7 +9,6 @@ import (
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/a179346/robert-go-monorepo/pkg/jsonvalidator"
 	"github.com/gohf-http/gohf/v6"
-	"github.com/gohf-http/gohf/v6/response"
 )
 
 type createPostRequestBody struct {
@@ -19,7 +18,7 @@ type createPostRequestBody struct {
 func (u PostUseCase) createPostHandler(c *gohf.Context) gohf.Response {
 	authorId, ok := authed_context.Value(c.Req.Context())
 	if !ok {
-		return response.Error(
+		return gohf_extended.NewErrorResponse(
 			http.StatusInternalServerError,
 			errors.New("Something went wrong"),
 		)
@@ -27,7 +26,7 @@ func (u PostUseCase) createPostHandler(c *gohf.Context) gohf.Response {
 
 	body, err := jsonvalidator.Validate[createPostRequestBody](c.Req.GetBody())
 	if err != nil {
-		return response.Error(
+		return gohf_extended.NewErrorResponse(
 			http.StatusBadRequest,
 			err,
 		)
@@ -39,7 +38,7 @@ func (u PostUseCase) createPostHandler(c *gohf.Context) gohf.Response {
 		body.Content,
 	)
 	if err != nil {
-		return response.Error(
+		return gohf_extended.NewErrorResponse(
 			http.StatusInternalServerError,
 			errors.New("Something went wrong"),
 		)

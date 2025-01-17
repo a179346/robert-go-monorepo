@@ -31,9 +31,7 @@ func New(writer io.WriteCloser) *FlushLogger {
 			select {
 			case v := <-logger.buf:
 				//nolint:errcheck
-				logger.writer.Write(v)
-				//nolint:errcheck
-				logger.writer.Write([]byte{'\n'})
+				logger.writer.Write(append(v, '\n'))
 
 			case <-time.After(20 * time.Millisecond):
 			}

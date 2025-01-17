@@ -29,11 +29,11 @@ func main() {
 
 	signal := <-graceful_shutdown.ShutDown()
 	logger.Infof("Received signal: %v", signal)
-	logger.Info("Shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
 
+	logger.Info("Shutting down server...")
 	if err := server.Shutdown(ctx); err != nil {
 		logger.Errorf("Error shutting down server: %v", err)
 	}

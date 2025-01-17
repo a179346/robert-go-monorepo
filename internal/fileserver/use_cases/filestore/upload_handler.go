@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/gohf-http/gohf/v6"
-	"github.com/gohf-http/gohf/v6/response"
 )
 
 func (fs FileStoreUseCase) uploadHandler(c *gohf.Context) gohf.Response {
@@ -14,30 +14,30 @@ func (fs FileStoreUseCase) uploadHandler(c *gohf.Context) gohf.Response {
 
 	blob, _, err := c.Req.FormFile("blob")
 	if err != nil {
-		return response.Error(http.StatusBadRequest, err)
+		return gohf_extended.NewErrorResponse(http.StatusBadRequest, err)
 	}
 	defer blob.Close()
 
 	offset, err := strconv.Atoi(c.Req.FormValue("offset"))
 	if err != nil || offset < 0 {
-		return response.Error(http.StatusBadRequest, errors.New("offset should be non-negative integer"))
+		return gohf_extended.NewErrorResponse(http.StatusBadRequest, errors.New("offset should be non-negative integer"))
 	}
 
 	length, err := strconv.Atoi(c.Req.FormValue("length"))
 	if err != nil || length < 0 {
-		return response.Error(http.StatusBadRequest, errors.New("length should be non-negative integer"))
+		return gohf_extended.NewErrorResponse(http.StatusBadRequest, errors.New("length should be non-negative integer"))
 	}
 
 	isLastChunk := false
 	if c.Req.FormValue("isLastChunk") == "true" {
 		isLastChunk = true
 	} else if c.Req.FormValue("isLastChunk") != "false" {
-		return response.Error(http.StatusBadRequest, errors.New("isLastChunk should be either true or false"))
+		return gohf_extended.NewErrorResponse(http.StatusBadRequest, errors.New("isLastChunk should be either true or false"))
 	}
 
 	filename := c.Req.GetHeader("filename")
 	if filename == "" {
-		return response.Error(http.StatusBadRequest, errors.New("filename is required"))
+		return gohf_extended.NewErrorResponse(http.StatusBadRequest, errors.New("filename is required"))
 	}
 
 	err = fs.fileStoreCommands.upload(
@@ -49,8 +49,8 @@ func (fs FileStoreUseCase) uploadHandler(c *gohf.Context) gohf.Response {
 		filename,
 	)
 	if err != nil {
-		return response.Error(http.StatusInternalServerError, err)
+		return gohf_extended.NewErrorResponse(http.StatusInternalServerError, err)
 	}
 
-	return response.Text(http.StatusOK, "OK")
+	return gohf_extended.NewCustomJsonResponse(http.StatusOK, "OK")
 }
