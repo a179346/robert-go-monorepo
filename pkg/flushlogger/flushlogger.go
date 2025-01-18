@@ -3,57 +3,29 @@ package flushlogger
 import (
 	"context"
 	"io"
-	"time"
+
+	"github.com/a179346/robert-go-monorepo/pkg/flushworker"
 )
 
 type FlushLogger struct {
-	writer         io.WriteCloser
-	buf            chan []byte
-	waitingForStop bool
-	stopped        chan struct{}
+	worker *flushworker.FlushWorker[[]byte]
+	writer io.WriteCloser
 }
 
 func New(writer io.WriteCloser) *FlushLogger {
-	logger := &FlushLogger{
-		writer:         writer,
-		buf:            make(chan []byte),
-		waitingForStop: false,
-		stopped:        make(chan struct{}),
-	}
+	worker := flushworker.New(func(v []byte) {
+		//nolint:errcheck
+		writer.Write(append(v, '\n'))
+	})
 
-	go func() {
-		for {
-			if logger.waitingForStop && len(logger.buf) == 0 {
-				close(logger.stopped)
-				return
-			}
-
-			select {
-			case v := <-logger.buf:
-				//nolint:errcheck
-				logger.writer.Write(append(v, '\n'))
-
-			case <-time.After(20 * time.Millisecond):
-			}
-		}
-	}()
-
-	return logger
+	return &FlushLogger{worker: worker}
 }
 
 func (logger *FlushLogger) Write(v []byte) {
-	logger.buf <- v
+	logger.worker.AddJob(v)
 }
 
-// Close closes the writer. Any accepted writes will be flushed. Any new writes will be rejected.
 func (logger *FlushLogger) Close(ctx context.Context) {
-	close(logger.buf)
-	logger.waitingForStop = true
-
-	select {
-	case <-ctx.Done():
-	case <-logger.stopped:
-	}
-
+	logger.worker.Close(ctx)
 	logger.writer.Close()
 }
