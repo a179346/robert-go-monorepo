@@ -18,7 +18,7 @@ func New(writer io.WriteCloser) *FlushLogger {
 		writer.Write(append(v, '\n'))
 	})
 
-	return &FlushLogger{worker: worker}
+	return &FlushLogger{worker, writer}
 }
 
 func (logger *FlushLogger) Write(v []byte) {
