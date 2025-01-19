@@ -5,6 +5,7 @@ import (
 
 	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/post_provider"
 	"github.com/google/uuid"
+	"github.com/ztrue/tracerr"
 )
 
 type postQueries struct {
@@ -19,12 +20,21 @@ func newPostQueries(postProvider post_provider.PostProvider) postQueries {
 
 func (postQueries postQueries) find(ctx context.Context, authorId string) ([]post_provider.PostResult, error) {
 	if authorId == "" {
-		return postQueries.postProvider.FindAll(ctx)
+		result, err := postQueries.postProvider.FindAll(ctx)
+		if err != nil {
+			return result, tracerr.Errorf("find posts error: %w", err)
+		}
+		return result, nil
 	}
 
 	authorUUID, err := uuid.Parse(authorId)
 	if err != nil {
-		return nil, err
+		return nil, tracerr.Errorf("uuid parse error: %w", err)
 	}
-	return postQueries.postProvider.FindByAuthor(ctx, authorUUID)
+
+	result, err := postQueries.postProvider.FindByAuthor(ctx, authorUUID)
+	if err != nil {
+		return result, tracerr.Errorf("find posts error: %w", err)
+	}
+	return result, nil
 }

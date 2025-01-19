@@ -8,14 +8,18 @@ import (
 
 	delay_app_applogger "github.com/a179346/robert-go-monorepo/internal/delay_app/applogger"
 	_ "github.com/a179346/robert-go-monorepo/internal/delay_app/config"
+	delay_app_config "github.com/a179346/robert-go-monorepo/internal/delay_app/config"
 	delay_app_server "github.com/a179346/robert-go-monorepo/internal/delay_app/server"
 	delay_use_case "github.com/a179346/robert-go-monorepo/internal/delay_app/use_cases/delay"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/a179346/robert-go-monorepo/pkg/graceful_shutdown"
 	"github.com/a179346/robert-go-monorepo/pkg/logger"
+	"github.com/ztrue/tracerr"
 )
 
 func main() {
+	tracerr.DefaultCap = 8
+	gohf_extended.SetReponseErrorDetail(delay_app_config.GetDebugConfig().ResponseErrorDetail)
 	appLogger := delay_app_applogger.GetFlushLogger()
 	if appLogger != nil {
 		gohf_extended.SetLogger(appLogger)

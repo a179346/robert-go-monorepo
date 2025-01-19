@@ -2,11 +2,11 @@ package gohf_extended
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/gohf-http/gohf/v6"
+	"github.com/ztrue/tracerr"
 )
 
 func ReadBodyMiddleware(c *gohf.Context) gohf.Response {
@@ -15,7 +15,8 @@ func ReadBodyMiddleware(c *gohf.Context) gohf.Response {
 	if err != nil {
 		return NewErrorResponse(
 			http.StatusInternalServerError,
-			fmt.Errorf("read body failed: %w", err),
+			"Something went wrong",
+			tracerr.Errorf("read body failed: %w", err),
 		)
 	}
 

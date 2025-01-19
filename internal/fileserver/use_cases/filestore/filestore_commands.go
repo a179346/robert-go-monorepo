@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/a179346/robert-go-monorepo/pkg/filesystem"
+	"github.com/ztrue/tracerr"
 )
 
 type fileStoreCommands struct {
@@ -27,7 +28,7 @@ func (fileStoreCommands fileStoreCommands) upload(
 	tempFolderPath := fileStoreCommands.fileStorePather.getTempFolder()
 	err := filesystem.EnsureDir(tempFolderPath)
 	if err != nil {
-		return err
+		return tracerr.Errorf("ensure dir error: %w", err)
 	}
 
 	tempFilePath := fileStoreCommands.fileStorePather.getTempFilePath(uploadId)
@@ -39,14 +40,18 @@ func (fileStoreCommands fileStoreCommands) upload(
 	}
 	err = chunkData.write(tempFilePath)
 	if err != nil {
-		return err
+		return tracerr.Errorf("chunk write error: %w", err)
 	}
 	if !isLastChunk {
 		return nil
 	}
 
 	dstFilepath := fileStoreCommands.fileStorePather.getFilePath(filename)
-	return filesystem.MoveFile(tempFilePath, dstFilepath)
+	err = filesystem.MoveFile(tempFilePath, dstFilepath)
+	if err != nil {
+		return tracerr.Errorf("move file error: %w", err)
+	}
+	return nil
 }
 
 type chunk struct {

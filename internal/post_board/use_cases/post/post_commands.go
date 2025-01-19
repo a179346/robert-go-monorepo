@@ -5,6 +5,7 @@ import (
 
 	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/post_provider"
 	"github.com/google/uuid"
+	"github.com/ztrue/tracerr"
 )
 
 type postCommands struct {
@@ -20,8 +21,13 @@ func newPostCommands(postProvider post_provider.PostProvider) postCommands {
 func (postCommands postCommands) createPost(ctx context.Context, authorId string, content string) error {
 	authorUUID, err := uuid.Parse(authorId)
 	if err != nil {
-		return err
+		return tracerr.Errorf("uuid parse error: %w", err)
 	}
 
-	return postCommands.postProvider.CreatePost(ctx, authorUUID, content)
+	err = postCommands.postProvider.CreatePost(ctx, authorUUID, content)
+	if err != nil {
+		return tracerr.Errorf("create post error: %w", err)
+	}
+
+	return nil
 }

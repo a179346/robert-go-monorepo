@@ -8,6 +8,7 @@ import (
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/a179346/robert-go-monorepo/pkg/jsonvalidator"
 	"github.com/gohf-http/gohf/v6"
+	"github.com/ztrue/tracerr"
 )
 
 type createUserRequestBody struct {
@@ -21,7 +22,8 @@ func (u UserUseCase) createUserHandler(c *gohf.Context) gohf.Response {
 	if !ok {
 		return gohf_extended.NewErrorResponse(
 			http.StatusInternalServerError,
-			errors.New("Something went wrong"),
+			"Something went wrong",
+			tracerr.New("failed to get body value"),
 		)
 	}
 
@@ -29,7 +31,8 @@ func (u UserUseCase) createUserHandler(c *gohf.Context) gohf.Response {
 	if err != nil {
 		return gohf_extended.NewErrorResponse(
 			http.StatusBadRequest,
-			err,
+			err.Error(),
+			tracerr.Errorf("body validation error: %w", err),
 		)
 	}
 
@@ -40,16 +43,19 @@ func (u UserUseCase) createUserHandler(c *gohf.Context) gohf.Response {
 		body.Password,
 	)
 	if err != nil {
-		if errors.Is(err, errDuplicatedEmail) {
+		unwrappedErr := tracerr.Unwrap(err)
+		if errors.Is(unwrappedErr, errDuplicatedEmail) {
 			return gohf_extended.NewErrorResponse(
 				http.StatusConflict,
+				"email has been taken",
 				err,
 			)
 		}
 
 		return gohf_extended.NewErrorResponse(
 			http.StatusInternalServerError,
-			errors.New("Something went wrong"),
+			"Something went wrong",
+			err,
 		)
 	}
 

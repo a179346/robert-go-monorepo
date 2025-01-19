@@ -8,14 +8,18 @@ import (
 
 	fileserver_applogger "github.com/a179346/robert-go-monorepo/internal/fileserver/applogger"
 	_ "github.com/a179346/robert-go-monorepo/internal/fileserver/config"
+	fileserver_config "github.com/a179346/robert-go-monorepo/internal/fileserver/config"
 	fileserver_server "github.com/a179346/robert-go-monorepo/internal/fileserver/server"
 	filestore_use_case "github.com/a179346/robert-go-monorepo/internal/fileserver/use_cases/filestore"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/a179346/robert-go-monorepo/pkg/graceful_shutdown"
 	"github.com/a179346/robert-go-monorepo/pkg/logger"
+	"github.com/ztrue/tracerr"
 )
 
 func main() {
+	tracerr.DefaultCap = 8
+	gohf_extended.SetReponseErrorDetail(fileserver_config.GetDebugConfig().ResponseErrorDetail)
 	appLogger := fileserver_applogger.GetFlushLogger()
 	if appLogger != nil {
 		gohf_extended.SetLogger(appLogger)

@@ -1,7 +1,6 @@
 package user_use_case
 
 import (
-	"errors"
 	"net/http"
 	"time"
 
@@ -24,7 +23,8 @@ func (u UserUseCase) getAllUsersHandler(c *gohf.Context) gohf.Response {
 	if err != nil {
 		return gohf_extended.NewErrorResponse(
 			http.StatusInternalServerError,
-			errors.New("Something went wrong"),
+			"Something went wrong",
+			err,
 		)
 	}
 

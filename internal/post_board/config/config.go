@@ -9,6 +9,7 @@ var once sync.Once
 func initAll() {
 	once.Do(func() {
 		initDBConfig()
+		initDebugConfig()
 		initJwtConfig()
 		initLoggerConfig()
 		initMigrationConfig()

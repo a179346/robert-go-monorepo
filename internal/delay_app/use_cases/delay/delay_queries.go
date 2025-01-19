@@ -3,6 +3,8 @@ package delay_use_case
 import (
 	"context"
 	"time"
+
+	"github.com/ztrue/tracerr"
 )
 
 type delayQueries struct{}
@@ -17,6 +19,6 @@ func (delayQueries delayQueries) getResult(ctx context.Context, ms int, d string
 		return d, nil
 
 	case <-ctx.Done():
-		return "", ctx.Err()
+		return "", tracerr.Errorf("get result error: %w", ctx.Err())
 	}
 }

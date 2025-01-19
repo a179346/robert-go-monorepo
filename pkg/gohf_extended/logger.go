@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gohf-http/gohf/v6"
+	"github.com/ztrue/tracerr"
 )
 
 type Logger interface {
@@ -18,7 +19,7 @@ func SetLogger(l Logger) {
 	logger = l
 }
 
-func log(w http.ResponseWriter, req *gohf.Request, status int, body interface{}, err interface{}) {
+func log(w http.ResponseWriter, req *gohf.Request, status int, body interface{}, err error) {
 	if logger == nil {
 		return
 	}
@@ -41,8 +42,7 @@ func log(w http.ResponseWriter, req *gohf.Request, status int, body interface{},
 			"status": status,
 			"body":   body,
 		},
-		// TODO it's empty
-		"err": err,
+		"error": tracerr.Sprint(err),
 	}
 
 	v, err := json.Marshal(content)

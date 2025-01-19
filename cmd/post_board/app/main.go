@@ -8,6 +8,7 @@ import (
 
 	post_board_applogger "github.com/a179346/robert-go-monorepo/internal/post_board/applogger"
 	_ "github.com/a179346/robert-go-monorepo/internal/post_board/config"
+	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/database/dbhelper"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/post_provider"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/user_provider"
@@ -18,9 +19,12 @@ import (
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/a179346/robert-go-monorepo/pkg/graceful_shutdown"
 	"github.com/a179346/robert-go-monorepo/pkg/logger"
+	"github.com/ztrue/tracerr"
 )
 
 func main() {
+	tracerr.DefaultCap = 8
+	gohf_extended.SetReponseErrorDetail(post_board_config.GetDebugConfig().ResponseErrorDetail)
 	appLogger := post_board_applogger.GetFlushLogger()
 	if appLogger != nil {
 		gohf_extended.SetLogger(appLogger)

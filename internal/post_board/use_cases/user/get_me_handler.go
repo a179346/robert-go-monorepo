@@ -8,6 +8,7 @@ import (
 	"github.com/a179346/robert-go-monorepo/internal/post_board/shared/authed_context"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/gohf-http/gohf/v6"
+	"github.com/ztrue/tracerr"
 )
 
 type getMeResponseBody struct {
@@ -23,21 +24,25 @@ func (u UserUseCase) getMeHandler(c *gohf.Context) gohf.Response {
 	if !ok {
 		return gohf_extended.NewErrorResponse(
 			http.StatusInternalServerError,
-			errors.New("Something went wrong"),
+			"Something went wrong",
+			tracerr.New("failed to get user id"),
 		)
 	}
 
 	user, err := u.userQueries.findUserById(c.Req.Context(), userId)
 	if err != nil {
-		if errors.Is(err, errUserNotFound) {
+		unwrappedErr := tracerr.Unwrap(err)
+		if errors.Is(unwrappedErr, errUserNotFound) {
 			return gohf_extended.NewErrorResponse(
 				http.StatusUnauthorized,
-				errors.New("User not found"),
+				"User not found",
+				err,
 			)
 		}
 		return gohf_extended.NewErrorResponse(
 			http.StatusInternalServerError,
-			errors.New("Something went wrong"),
+			"Something went wrong",
+			err,
 		)
 	}
 

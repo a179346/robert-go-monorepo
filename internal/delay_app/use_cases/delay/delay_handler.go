@@ -1,13 +1,13 @@
 package delay_use_case
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/gohf-http/gohf/v6"
+	"github.com/ztrue/tracerr"
 )
 
 func (u DelayUseCase) delayHandler(c *gohf.Context) gohf.Response {
@@ -18,14 +18,16 @@ func (u DelayUseCase) delayHandler(c *gohf.Context) gohf.Response {
 	if err != nil {
 		return gohf_extended.NewErrorResponse(
 			http.StatusBadRequest,
-			fmt.Errorf("Invalid delay: %s", delayMs),
+			fmt.Sprintf("Delay should be integer between 0 and 60000. got: %v", delayMs),
+			tracerr.Errorf("parse delay error: %w", err),
 		)
 	}
 
 	if ms < 0 || ms > 60000 {
 		return gohf_extended.NewErrorResponse(
 			http.StatusBadRequest,
-			errors.New("Delay ms should be 0 ~ 60000"),
+			fmt.Sprintf("Delay should be integer between 0 and 60000. got: %v", ms),
+			tracerr.Errorf("Delay should be integer between 0 and 60000. got: %v", ms),
 		)
 	}
 
@@ -33,7 +35,8 @@ func (u DelayUseCase) delayHandler(c *gohf.Context) gohf.Response {
 	if err != nil {
 		return gohf_extended.NewErrorResponse(
 			http.StatusInternalServerError,
-			errors.New("Something went wrong"),
+			"Something went wrong",
+			err,
 		)
 	}
 
