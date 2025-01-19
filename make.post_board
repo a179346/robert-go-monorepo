@@ -27,6 +27,10 @@ gen_jet_sql_builder:
 		-ignore-tables=schema_migrations \
 		-path=$(JET_GEN_OUTPUT_PATH)
 
+.PHONY: local_run_app
+local_run_app:
+	go run ./cmd/post_board/app
+
 .PHONY: local_run_migration_up
 local_run_migration_up:
 	MIGRATION_UP=true go run ./cmd/post_board/migration
