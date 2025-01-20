@@ -11,7 +11,7 @@ type MigrationConfig struct {
 var migrationConfig MigrationConfig
 
 func initMigrationConfig() {
-	migrationConfig.FolderPath = env_helper.GetStringEnv("MIGRATION_FOLDER_PATH", "internal/post_board/database/migrations")
+	migrationConfig.FolderPath = env_helper.GetStringEnv("MIGRATION_FOLDER_PATH", "internal/post_board/migrations")
 	migrationConfig.Verbose = env_helper.GetBoolEnv("MIGRATION_VERBOSE", true)
 	migrationConfig.Up = env_helper.GetBoolEnv("MIGRATION_UP", true)
 }

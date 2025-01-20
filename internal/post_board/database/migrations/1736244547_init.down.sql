@@ -1,6 +1,0 @@
-BEGIN;
-
-DROP TABLE "post";
-DROP TABLE "user";
-
-COMMIT;

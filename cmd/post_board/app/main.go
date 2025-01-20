@@ -7,7 +7,6 @@ import (
 	"time"
 
 	post_board_applogger "github.com/a179346/robert-go-monorepo/internal/post_board/applogger"
-	_ "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/database/dbhelper"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/post_provider"
