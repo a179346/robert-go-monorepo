@@ -2,6 +2,7 @@ package flushworker
 
 import (
 	"context"
+	"sync"
 )
 
 type FlushWorker[T any] struct {
@@ -10,17 +11,26 @@ type FlushWorker[T any] struct {
 	stopped chan struct{}
 }
 
-func New[T any](handle func(v T)) *FlushWorker[T] {
+func New[T any](handle func(v T), concurrency int, bufferLength int) *FlushWorker[T] {
 	worker := &FlushWorker[T]{
-		buf:     make(chan T),
+		buf:     make(chan T, bufferLength),
 		handle:  handle,
 		stopped: make(chan struct{}),
 	}
+	wg := new(sync.WaitGroup)
+	wg.Add(concurrency)
+
+	for i := 0; i < concurrency; i++ {
+		go func() {
+			for v := range worker.buf {
+				worker.handle(v)
+			}
+			wg.Done()
+		}()
+	}
 
 	go func() {
-		for v := range worker.buf {
-			worker.handle(v)
-		}
+		wg.Wait()
 		close(worker.stopped)
 	}()
 

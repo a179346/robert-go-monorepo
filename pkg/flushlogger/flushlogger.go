@@ -16,7 +16,7 @@ func New(writer io.WriteCloser) *FlushLogger {
 	worker := flushworker.New(func(v []byte) {
 		//nolint:errcheck
 		writer.Write(append(v, '\n'))
-	})
+	}, 1, 256)
 
 	return &FlushLogger{worker, writer}
 }
