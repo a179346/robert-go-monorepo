@@ -28,9 +28,16 @@ func log(w http.ResponseWriter, req *gohf.Request, status int, body interface{},
 
 	bodyBytes, _ := BodyValue(req.Context())
 
+	startTime := req.GetTimestamp()
+	endTime := time.Now()
+	elapsedMs := endTime.UnixMilli() - startTime.UnixMilli()
+
 	content := tjson{
-		"unixMilli": req.GetTimestamp().UnixMilli(),
-		"time":      req.GetTimestamp().Format(time.RFC3339),
+		"startUnixMs": startTime.UnixMilli(),
+		"startTime":   startTime.Format(time.RFC3339),
+		"endUnixMs":   endTime.UnixMilli(),
+		"endTime":     endTime.Format(time.RFC3339),
+		"elapsedMs":   elapsedMs,
 		"req": tjson{
 			"uri":    req.RequestURI(),
 			"method": req.Method(),
