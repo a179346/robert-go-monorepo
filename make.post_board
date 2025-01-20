@@ -17,6 +17,7 @@ docker_run_db:
 .PHONY: docker_run_rabbitmq
 docker_run_rabbitmq:
 	docker run --rm --name post-board-rabbitmq \
+		--hostname post-board-rabbitmq \
 		-p 5672:5672 -p 15672:15672 \
 		-v /${PWD}/storage/post-board-rabbitmq:/var/lib/rabbitmq \
 		-e RABBITMQ_DEFAULT_USER="post-board-user" \
