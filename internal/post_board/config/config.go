@@ -13,6 +13,7 @@ func initAll() {
 		initJwtConfig()
 		initLoggerConfig()
 		initMigrationConfig()
+		initRabbitMQConfig()
 		initServerConfig()
 	})
 }
