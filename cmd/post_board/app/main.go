@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
 
 	post_board_applogger "github.com/a179346/robert-go-monorepo/internal/post_board/applogger"
-	_ "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/database/dbhelper"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/post_provider"
@@ -23,18 +23,38 @@ import (
 )
 
 func main() {
+	if err := run(); err != nil {
+		logger.Errorf("%v", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	tracerr.DefaultCap = 8
+
+	gohf_extended.SetAppId("post_board")
 	gohf_extended.SetReponseErrorDetail(post_board_config.GetDebugConfig().ResponseErrorDetail)
-	appLogger := post_board_applogger.GetFlushLogger()
+	appLogger, err := post_board_applogger.GetRabbitMQLogger()
+	if err != nil {
+		return fmt.Errorf("GetRabbitMQLogger error: %w", err)
+	}
 	if appLogger != nil {
+		defer func() {
+			logger.Info("Shutting down app logger...")
+			time.Sleep(2 * time.Second)
+			appLogger.Close()
+		}()
 		gohf_extended.SetLogger(appLogger)
 	}
 
 	db, err := dbhelper.Open()
 	if err != nil {
-		logger.Errorf("opendb.Open error: %v", err)
-		os.Exit(1)
+		return fmt.Errorf("opendb.Open error: %w", err)
 	}
+	defer func() {
+		logger.Info("Shutting down db...")
+		db.Close()
+	}()
 	db.SetMaxOpenConns(30)
 	dbhelper.WaitFor(context.Background(), db)
 
@@ -49,32 +69,28 @@ func main() {
 		},
 	)
 
-	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Errorf("Error starting server: %v", err)
-			os.Exit(1)
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+		defer cancel()
+		logger.Info("Shutting down server...")
+		if err := server.Shutdown(ctx); err != nil {
+			logger.Errorf("Error shutting down server: %v", err)
 		}
 	}()
 
-	signal := <-graceful_shutdown.ShutDown()
-	logger.Infof("Received signal: %v", signal)
+	serverListenErrCh := make(chan error)
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			serverListenErrCh <- fmt.Errorf("Error starting server: %w", err)
+		}
+	}()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
-	defer cancel()
+	select {
+	case signal := <-graceful_shutdown.ShutDown():
+		logger.Infof("Received signal: %v", signal)
+		return nil
 
-	logger.Info("Shutting down server...")
-	if err := server.Shutdown(ctx); err != nil {
-		logger.Errorf("Error shutting down server: %v", err)
+	case err := <-serverListenErrCh:
+		return err
 	}
-
-	logger.Info("Shutting down db...")
-	db.Close()
-
-	if appLogger != nil {
-		logger.Info("Shutting down app logger...")
-		time.Sleep(2 * time.Second)
-		appLogger.Close(ctx)
-	}
-
-	logger.Info("Server shut down successfully")
 }

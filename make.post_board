@@ -14,6 +14,16 @@ docker_run_db:
 		-e POSTGRES_PASSWORD="$(DB_PASSWORD)" \
 		postgres:17.2-alpine3.21
 
+.PHONY: docker_run_rabbitmq
+docker_run_rabbitmq:
+	docker run --rm --name post-board-rabbitmq \
+		--hostname post-board-rabbitmq \
+		-p 5672:5672 -p 15672:15672 \
+		-v /${PWD}/storage/post-board-rabbitmq:/var/lib/rabbitmq \
+		-e RABBITMQ_DEFAULT_USER="post-board-user" \
+		-e RABBITMQ_DEFAULT_PASS="mymqpass" \
+		rabbitmq:4.0.5-management-alpine
+
 JET_GEN_OUTPUT_PATH ?= ./internal/post_board/database/.jet_gen
 
 .PHONY: gen_jet_sql_builder

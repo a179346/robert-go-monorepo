@@ -7,13 +7,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	_ "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/database/dbhelper"
+	_ "github.com/a179346/robert-go-monorepo/internal/post_board/migrations"
 	"github.com/a179346/robert-go-monorepo/pkg/logger"
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/pressly/goose/v3"
 )
 
 func main() {
@@ -28,9 +26,6 @@ func run(ctx context.Context) error {
 	ctx, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	migrationConfig := post_board_config.GetMigrationConfig()
-	sourceURL := "file://" + migrationConfig.FolderPath
-
 	db, err := dbhelper.Open()
 	if err != nil {
 		return fmt.Errorf("opendb.Open error: %w", err)
@@ -42,50 +37,28 @@ func run(ctx context.Context) error {
 		return ctx.Err()
 	}
 
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
-	if err != nil {
-		return fmt.Errorf("postgres.WithInstance error: %w", err)
-	}
+	migrationConfig := post_board_config.GetMigrationConfig()
 
-	m, err := migrate.NewWithDatabaseInstance(sourceURL, post_board_config.GetDBConfig().Database, driver)
+	gooseProvider, err := goose.NewProvider(
+		goose.DialectPostgres,
+		db,
+		os.DirFS(migrationConfig.FolderPath),
+		goose.WithVerbose(true),
+		goose.WithAllowOutofOrder(true),
+	)
 	if err != nil {
-		return fmt.Errorf("migrate.NewWithDatabaseInstance error: %w", err)
+		return fmt.Errorf("goose.NewProvider error: %w", err)
 	}
-	m.Log = NewMigationLogger(migrationConfig.Verbose)
-
-	go func() {
-		<-ctx.Done()
-		logger.Info("Gracefully shutting down ...")
-		m.GracefulStop <- true
-	}()
 
 	if migrationConfig.Up {
-		err = m.Up()
-		if err != nil && err.Error() != "no change" {
-			return fmt.Errorf("m.Up error: %w", err)
+		if _, err := gooseProvider.Up(ctx); err != nil {
+			return fmt.Errorf("gooseProvider.Up error: %w", err)
 		}
 	} else {
-		err = m.Steps(-1)
-		if err != nil {
-			return fmt.Errorf("m.Steps(-1) error: %w", err)
+		if _, err := gooseProvider.Down(ctx); err != nil {
+			return fmt.Errorf("gooseProvider.Down error: %w", err)
 		}
 	}
 
 	return ctx.Err()
-}
-
-type MigationLogger struct {
-	verbose bool
-}
-
-func NewMigationLogger(verbose bool) MigationLogger {
-	return MigationLogger{verbose}
-}
-
-func (log MigationLogger) Printf(format string, v ...interface{}) {
-	logger.Infof(format, v...)
-}
-
-func (log MigationLogger) Verbose() bool {
-	return log.verbose
 }

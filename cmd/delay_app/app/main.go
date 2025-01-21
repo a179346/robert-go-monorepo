@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -18,10 +19,24 @@ import (
 )
 
 func main() {
+	if err := run(); err != nil {
+		logger.Errorf("%v", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	tracerr.DefaultCap = 8
+
+	gohf_extended.SetAppId("delay_app")
 	gohf_extended.SetReponseErrorDetail(delay_app_config.GetDebugConfig().ResponseErrorDetail)
 	appLogger := delay_app_applogger.GetFlushLogger()
 	if appLogger != nil {
+		defer func() {
+			logger.Info("Shutting down app logger...")
+			time.Sleep(2 * time.Second)
+			appLogger.Close()
+		}()
 		gohf_extended.SetLogger(appLogger)
 	}
 
@@ -31,29 +46,28 @@ func main() {
 		},
 	)
 
-	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Errorf("Error starting server: %v", err)
-			os.Exit(1)
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+		defer cancel()
+		logger.Info("Shutting down server...")
+		if err := server.Shutdown(ctx); err != nil {
+			logger.Errorf("Error shutting down server: %v", err)
 		}
 	}()
 
-	signal := <-graceful_shutdown.ShutDown()
-	logger.Infof("Received signal: %v", signal)
+	serverListenErrCh := make(chan error)
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			serverListenErrCh <- fmt.Errorf("Error starting server: %w", err)
+		}
+	}()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
-	defer cancel()
+	select {
+	case signal := <-graceful_shutdown.ShutDown():
+		logger.Infof("Received signal: %v", signal)
+		return nil
 
-	logger.Info("Shutting down server...")
-	if err := server.Shutdown(ctx); err != nil {
-		logger.Errorf("Error shutting down server: %v", err)
+	case err := <-serverListenErrCh:
+		return err
 	}
-
-	if appLogger != nil {
-		logger.Info("Shutting down app logger...")
-		time.Sleep(2 * time.Second)
-		appLogger.Close(ctx)
-	}
-
-	logger.Info("Server shut down successfully")
 }
