@@ -17,7 +17,7 @@ func init() {
 const deadLoggingExchange = "dead-logging-exchange"
 const deadLoggingQueue = "dead-logging-queue"
 const loggingExchange = "logging-exchange"
-const fileLoggingQueue = "file-logging-queue"
+const loggingQueue = "logging-queue"
 
 func Up1737375716(ctx context.Context, tx *sql.Tx) error {
 	conn, err := amqp.Dial(post_board_config.GetRabbitMQConfig().Url)
@@ -84,7 +84,7 @@ func Up1737375716(ctx context.Context, tx *sql.Tx) error {
 	}
 
 	_, err = ch.QueueDeclare(
-		fileLoggingQueue,
+		loggingQueue,
 		true,
 		false,
 		false,
@@ -97,18 +97,18 @@ func Up1737375716(ctx context.Context, tx *sql.Tx) error {
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("ch.QueueDeclare(%v) error: %w", fileLoggingQueue, err)
+		return fmt.Errorf("ch.QueueDeclare(%v) error: %w", loggingQueue, err)
 	}
 
 	err = ch.QueueBind(
-		fileLoggingQueue,
-		fileLoggingQueue,
+		loggingQueue,
+		loggingQueue,
 		loggingExchange,
 		false,
 		amqp.Table{},
 	)
 	if err != nil {
-		return fmt.Errorf("ch.QueueBind(%v) error: %w", fileLoggingQueue, err)
+		return fmt.Errorf("ch.QueueBind(%v) error: %w", loggingQueue, err)
 	}
 
 	return nil
@@ -127,13 +127,13 @@ func Down1737375716(ctx context.Context, tx *sql.Tx) error {
 	}
 
 	err = ch.QueueUnbind(
-		fileLoggingQueue,
-		fileLoggingQueue,
+		loggingQueue,
+		loggingQueue,
 		loggingExchange,
 		amqp.Table{},
 	)
 	if err != nil {
-		return fmt.Errorf("ch.QueueUnbind(%v) error: %w", fileLoggingQueue, err)
+		return fmt.Errorf("ch.QueueUnbind(%v) error: %w", loggingQueue, err)
 	}
 
 	err = ch.QueueUnbind(
@@ -156,13 +156,13 @@ func Down1737375716(ctx context.Context, tx *sql.Tx) error {
 	}
 
 	_, err = ch.QueueDelete(
-		fileLoggingQueue,
+		loggingQueue,
 		false,
 		false,
 		false,
 	)
 	if err != nil {
-		return fmt.Errorf("ch.QueueDelete(%v) error: %w", fileLoggingQueue, err)
+		return fmt.Errorf("ch.QueueDelete(%v) error: %w", loggingQueue, err)
 	}
 
 	err = ch.ExchangeDelete(

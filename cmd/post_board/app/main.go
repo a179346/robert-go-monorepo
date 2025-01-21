@@ -24,7 +24,11 @@ import (
 func main() {
 	tracerr.DefaultCap = 8
 	gohf_extended.SetReponseErrorDetail(post_board_config.GetDebugConfig().ResponseErrorDetail)
-	appLogger := post_board_applogger.GetFlushLogger()
+	appLogger, err := post_board_applogger.GetRabbitMQLogger()
+	if err != nil {
+		logger.Errorf("GetRabbitMQLogger error: %v", err)
+		os.Exit(1)
+	}
 	if appLogger != nil {
 		gohf_extended.SetLogger(appLogger)
 	}

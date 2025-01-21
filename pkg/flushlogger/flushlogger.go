@@ -13,10 +13,10 @@ type FlushLogger struct {
 }
 
 func New(writer io.WriteCloser) *FlushLogger {
-	worker := flushworker.New(func(v []byte) {
+	worker := flushworker.New(func(v []byte, goRoutineId int) {
 		//nolint:errcheck
 		writer.Write(append(v, '\n'))
-	}, 1, 256)
+	}, 1, 1024)
 
 	return &FlushLogger{worker, writer}
 }

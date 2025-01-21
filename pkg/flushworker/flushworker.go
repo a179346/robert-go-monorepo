@@ -7,11 +7,11 @@ import (
 
 type FlushWorker[T any] struct {
 	buf     chan T
-	handle  func(v T)
+	handle  func(v T, goRoutineId int)
 	stopped chan struct{}
 }
 
-func New[T any](handle func(v T), concurrency int, bufferLength int) *FlushWorker[T] {
+func New[T any](handle func(v T, goRoutineId int), concurrency int, bufferLength int) *FlushWorker[T] {
 	worker := &FlushWorker[T]{
 		buf:     make(chan T, bufferLength),
 		handle:  handle,
@@ -23,7 +23,7 @@ func New[T any](handle func(v T), concurrency int, bufferLength int) *FlushWorke
 	for i := 0; i < concurrency; i++ {
 		go func() {
 			for v := range worker.buf {
-				worker.handle(v)
+				worker.handle(v, i)
 			}
 			wg.Done()
 		}()
