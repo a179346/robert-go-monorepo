@@ -1,7 +1,6 @@
 package flushworker
 
 import (
-	"context"
 	"sync"
 )
 
@@ -42,11 +41,7 @@ func (worker *FlushWorker[T]) AddJob(v T) {
 }
 
 // Close closes the write to the buffer. Any accepted writes will be flushed. Any new writes will be rejected.
-func (worker *FlushWorker[T]) Close(ctx context.Context) {
+func (worker *FlushWorker[T]) Close() {
 	close(worker.buf)
-
-	select {
-	case <-ctx.Done():
-	case <-worker.stopped:
-	}
+	<-worker.stopped
 }

@@ -1,7 +1,6 @@
 package gohf_extended
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 
@@ -10,7 +9,7 @@ import (
 )
 
 type Logger interface {
-	Write(v []byte)
+	Write(logData LogData)
 }
 
 var logger Logger
@@ -19,43 +18,71 @@ func SetLogger(l Logger) {
 	logger = l
 }
 
+var appId string
+
+func SetAppId(id string) {
+	appId = id
+}
+
+type LogData struct {
+	ID          string          `json:"id"`
+	App         string          `json:"app"`
+	StartUnixMs int64           `json:"startUnixMs"`
+	StartTime   string          `json:"startTime"`
+	EndUnixMs   int64           `json:"endUnixMs"`
+	EndTime     string          `json:"endTime"`
+	ElapsedMs   int64           `json:"elapsedMs"`
+	Error       string          `json:"error"`
+	Req         LogDataRequest  `json:"req"`
+	Res         LogDataResponse `json:"res"`
+}
+
+type LogDataRequest struct {
+	Uri    string              `json:"uri"`
+	Method string              `json:"method"`
+	Header map[string][]string `json:"header"`
+	Body   string              `json:"body"`
+}
+
+type LogDataResponse struct {
+	Header map[string][]string `json:"header"`
+	Status int                 `json:"status"`
+	Body   interface{}         `json:"body"`
+}
+
 func log(w http.ResponseWriter, req *gohf.Request, status int, body interface{}, err error) {
 	if logger == nil {
 		return
 	}
 
-	type tjson map[string]interface{}
-
 	bodyBytes, _ := BodyValue(req.Context())
+	requestId, _ := IdValue(req.Context())
 
 	startTime := req.GetTimestamp()
 	endTime := time.Now()
 	elapsedMs := endTime.UnixMilli() - startTime.UnixMilli()
 
-	content := tjson{
-		"startUnixMs": startTime.UnixMilli(),
-		"startTime":   startTime.Format(time.RFC3339),
-		"endUnixMs":   endTime.UnixMilli(),
-		"endTime":     endTime.Format(time.RFC3339),
-		"elapsedMs":   elapsedMs,
-		"req": tjson{
-			"uri":    req.RequestURI(),
-			"method": req.Method(),
-			"header": req.GetHttpRequest().Header,
-			"body":   string(bodyBytes),
+	logData := LogData{
+		ID:          requestId.String(),
+		App:         appId,
+		StartUnixMs: startTime.UnixMilli(),
+		StartTime:   startTime.Format(time.RFC3339),
+		EndUnixMs:   endTime.UnixMilli(),
+		EndTime:     endTime.Format(time.RFC3339),
+		ElapsedMs:   elapsedMs,
+		Error:       tracerr.Sprint(err),
+		Req: LogDataRequest{
+			Uri:    req.RequestURI(),
+			Method: req.Method(),
+			Header: req.GetHttpRequest().Header,
+			Body:   string(bodyBytes),
 		},
-		"res": tjson{
-			"header": w.Header(),
-			"status": status,
-			"body":   body,
+		Res: LogDataResponse{
+			Header: w.Header(),
+			Status: status,
+			Body:   body,
 		},
-		"error": tracerr.Sprint(err),
 	}
 
-	v, err := json.Marshal(content)
-	if err != nil {
-		return
-	}
-
-	logger.Write(v)
+	logger.Write(logData)
 }

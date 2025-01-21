@@ -1,16 +1,17 @@
 package rabbitmqlogger
 
 import (
-	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/a179346/robert-go-monorepo/pkg/flushworker"
+	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type RabbitMQLogger struct {
-	worker   *flushworker.FlushWorker[[]byte]
+	worker   *flushworker.FlushWorker[gohf_extended.LogData]
 	conn     *amqp.Connection
 	channels []*amqp.Channel
 }
@@ -24,7 +25,12 @@ func New(conn *amqp.Connection, exchange string) *RabbitMQLogger {
 		channels: make([]*amqp.Channel, concurrency),
 	}
 
-	worker := flushworker.New(func(v []byte, goRoutineId int) {
+	worker := flushworker.New(func(logData gohf_extended.LogData, goRoutineId int) {
+		body, err := json.Marshal(logData)
+		if err != nil {
+			return
+		}
+
 		for retryCnt := 1; retryCnt <= maxRetryCnt; retryCnt++ {
 			ch, err := logger.getChannel(goRoutineId)
 			if err == nil {
@@ -34,8 +40,12 @@ func New(conn *amqp.Connection, exchange string) *RabbitMQLogger {
 					false,
 					false,
 					amqp.Publishing{
+						MessageId:    logData.ID,
+						AppId:        logData.App,
+						ContentType:  "application/json",
 						DeliveryMode: 2,
-						Body:         v,
+						Body:         body,
+						Timestamp:    time.UnixMilli(logData.StartUnixMs),
 					},
 				)
 			}
@@ -51,12 +61,12 @@ func New(conn *amqp.Connection, exchange string) *RabbitMQLogger {
 	return logger
 }
 
-func (logger *RabbitMQLogger) Write(v []byte) {
-	logger.worker.AddJob(v)
+func (logger *RabbitMQLogger) Write(logData gohf_extended.LogData) {
+	logger.worker.AddJob(logData)
 }
 
-func (logger *RabbitMQLogger) Close(ctx context.Context) {
-	logger.worker.Close(ctx)
+func (logger *RabbitMQLogger) Close() {
+	logger.worker.Close()
 	logger.conn.Close()
 }
 
