@@ -8,7 +8,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func GetRabbitMQLogger() (*rabbitmqlogger.RabbitMQLogger, error) {
+func GetAppLogger() (*rabbitmqlogger.RabbitMQLogger, error) {
 	loggingConfig := post_board_config.GetLoggerConfig()
 	if !loggingConfig.Enable {
 		return nil, nil

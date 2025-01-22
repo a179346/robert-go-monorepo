@@ -16,15 +16,15 @@ import (
 	auth_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/auth"
 	post_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/post"
 	user_use_case "github.com/a179346/robert-go-monorepo/internal/post_board/use_cases/user"
+	"github.com/a179346/robert-go-monorepo/pkg/console"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/a179346/robert-go-monorepo/pkg/graceful_shutdown"
-	"github.com/a179346/robert-go-monorepo/pkg/logger"
 	"github.com/ztrue/tracerr"
 )
 
 func main() {
 	if err := run(); err != nil {
-		logger.Errorf("%v", err)
+		console.Errorf("%v", err)
 		os.Exit(1)
 	}
 }
@@ -34,17 +34,17 @@ func run() error {
 
 	gohf_extended.SetAppId("post_board")
 	gohf_extended.SetReponseErrorDetail(post_board_config.GetDebugConfig().ResponseErrorDetail)
-	appLogger, err := post_board_applogger.GetRabbitMQLogger()
+	appLogger, err := post_board_applogger.GetAppLogger()
 	if err != nil {
-		return fmt.Errorf("GetRabbitMQLogger error: %w", err)
+		return fmt.Errorf("GetAppLogger error: %w", err)
 	}
 	if appLogger != nil {
 		defer func() {
-			logger.Info("Shutting down app logger...")
+			console.Info("Shutting down app logger...")
 			time.Sleep(2 * time.Second)
 			appLogger.Close()
 		}()
-		gohf_extended.SetLogger(appLogger)
+		gohf_extended.SetAppLogger(appLogger)
 	}
 
 	db, err := dbhelper.Open()
@@ -52,7 +52,7 @@ func run() error {
 		return fmt.Errorf("opendb.Open error: %w", err)
 	}
 	defer func() {
-		logger.Info("Shutting down db...")
+		console.Info("Shutting down db...")
 		db.Close()
 	}()
 	db.SetMaxOpenConns(30)
@@ -72,9 +72,9 @@ func run() error {
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 		defer cancel()
-		logger.Info("Shutting down server...")
+		console.Info("Shutting down server...")
 		if err := server.Shutdown(ctx); err != nil {
-			logger.Errorf("Error shutting down server: %v", err)
+			console.Errorf("Error shutting down server: %v", err)
 		}
 	}()
 
@@ -87,7 +87,7 @@ func run() error {
 
 	select {
 	case signal := <-graceful_shutdown.ShutDown():
-		logger.Infof("Received signal: %v", signal)
+		console.Infof("Received signal: %v", signal)
 		return nil
 
 	case err := <-serverListenErrCh:

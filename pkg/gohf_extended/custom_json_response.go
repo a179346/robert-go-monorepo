@@ -33,7 +33,7 @@ func (res CutsomJsonResponse[T]) Send(w http.ResponseWriter, req *gohf.Request) 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(res.Status)
 
-	if logger != nil {
+	if appLogger != nil {
 		log(w, req, res.Status, res.Data, nil)
 	}
 

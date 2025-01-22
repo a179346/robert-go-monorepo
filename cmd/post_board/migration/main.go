@@ -10,14 +10,14 @@ import (
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/database/dbhelper"
 	_ "github.com/a179346/robert-go-monorepo/internal/post_board/migrations"
-	"github.com/a179346/robert-go-monorepo/pkg/logger"
+	"github.com/a179346/robert-go-monorepo/pkg/console"
 	"github.com/pressly/goose/v3"
 )
 
 func main() {
 	ctx := context.Background()
 	if err := run(ctx); err != nil {
-		logger.Errorf("%s", err)
+		console.Errorf("%s", err)
 		os.Exit(1)
 	}
 }

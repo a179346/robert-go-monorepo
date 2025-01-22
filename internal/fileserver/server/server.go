@@ -7,8 +7,8 @@ import (
 
 	fileserver_config "github.com/a179346/robert-go-monorepo/internal/fileserver/config"
 	filestore_use_case "github.com/a179346/robert-go-monorepo/internal/fileserver/use_cases/filestore"
+	"github.com/a179346/robert-go-monorepo/pkg/console"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
-	"github.com/a179346/robert-go-monorepo/pkg/logger"
 	"github.com/gohf-http/gohf/v6"
 	"github.com/rs/cors"
 )
@@ -44,7 +44,7 @@ func New(options Options) *Server {
 }
 
 func (s *Server) ListenAndServe() error {
-	logger.Infof("Starting server on \"%s\"", s.httpserver.Addr)
+	console.Infof("Starting server on \"%s\"", s.httpserver.Addr)
 	return s.httpserver.ListenAndServe()
 }
 

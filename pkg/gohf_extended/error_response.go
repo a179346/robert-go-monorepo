@@ -17,6 +17,16 @@ func SetReponseErrorDetail(v bool) {
 	responseErrorDetail = v
 }
 
+type ErrorResponseData struct {
+	Status  int    `json:"status"`
+	Message string `json:"message"`
+	Detail  string `json:"detail,omitempty"`
+}
+
+func (err ErrorResponseData) Error() string {
+	return err.Message
+}
+
 type ErrorResponse struct {
 	Status  int
 	Message string
@@ -43,15 +53,15 @@ func (res ErrorResponse) Send(w http.ResponseWriter, req *gohf.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(res.Status)
 
-	body := map[string]interface{}{
-		"status":  res.Status,
-		"message": res.Message,
+	body := ErrorResponseData{
+		Status:  res.Status,
+		Message: res.Message,
 	}
 	if responseErrorDetail {
-		body["detail"] = tracerr.Sprint(res.Err)
+		body.Detail = tracerr.Sprint(res.Err)
 	}
 
-	if logger != nil {
+	if appLogger != nil {
 		log(w, req, res.Status, body, res.Err)
 	}
 

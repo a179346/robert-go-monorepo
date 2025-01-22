@@ -9,7 +9,7 @@ type ServerConfig struct {
 var serverConfig ServerConfig
 
 func initServerConfig() {
-	serverConfig.Port = env_helper.GetIntEnv("SERVER_PORT", 8080)
+	serverConfig.Port = env_helper.GetInt("SERVER_PORT", 8080)
 }
 
 func GetServerConfig() ServerConfig {

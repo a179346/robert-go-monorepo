@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gohf-http/gohf/v6/response"
+	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 )
 
 func HandleResponse[T any](resp *http.Response, responseObject *T) (*T, error) {
@@ -16,7 +16,7 @@ func HandleResponse[T any](resp *http.Response, responseObject *T) (*T, error) {
 	}
 
 	if resp.StatusCode >= http.StatusBadRequest {
-		var errResponse response.ErrorResponse
+		var errResponse gohf_extended.ErrorResponseData
 		if err := json.Unmarshal(body, &errResponse); err != nil {
 			return nil, err
 		}

@@ -12,15 +12,15 @@ import (
 	delay_app_config "github.com/a179346/robert-go-monorepo/internal/delay_app/config"
 	delay_app_server "github.com/a179346/robert-go-monorepo/internal/delay_app/server"
 	delay_use_case "github.com/a179346/robert-go-monorepo/internal/delay_app/use_cases/delay"
+	"github.com/a179346/robert-go-monorepo/pkg/console"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/a179346/robert-go-monorepo/pkg/graceful_shutdown"
-	"github.com/a179346/robert-go-monorepo/pkg/logger"
 	"github.com/ztrue/tracerr"
 )
 
 func main() {
 	if err := run(); err != nil {
-		logger.Errorf("%v", err)
+		console.Errorf("%v", err)
 		os.Exit(1)
 	}
 }
@@ -30,14 +30,14 @@ func run() error {
 
 	gohf_extended.SetAppId("delay_app")
 	gohf_extended.SetReponseErrorDetail(delay_app_config.GetDebugConfig().ResponseErrorDetail)
-	appLogger := delay_app_applogger.GetFlushLogger()
+	appLogger := delay_app_applogger.GetAppLogger()
 	if appLogger != nil {
 		defer func() {
-			logger.Info("Shutting down app logger...")
+			console.Info("Shutting down app logger...")
 			time.Sleep(2 * time.Second)
 			appLogger.Close()
 		}()
-		gohf_extended.SetLogger(appLogger)
+		gohf_extended.SetAppLogger(appLogger)
 	}
 
 	server := delay_app_server.New(
@@ -49,9 +49,9 @@ func run() error {
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 		defer cancel()
-		logger.Info("Shutting down server...")
+		console.Info("Shutting down server...")
 		if err := server.Shutdown(ctx); err != nil {
-			logger.Errorf("Error shutting down server: %v", err)
+			console.Errorf("Error shutting down server: %v", err)
 		}
 	}()
 
@@ -64,7 +64,7 @@ func run() error {
 
 	select {
 	case signal := <-graceful_shutdown.ShutDown():
-		logger.Infof("Received signal: %v", signal)
+		console.Infof("Received signal: %v", signal)
 		return nil
 
 	case err := <-serverListenErrCh:

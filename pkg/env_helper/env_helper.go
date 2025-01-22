@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func GetStringEnv(key string, defaultValue string) string {
+func GetString(key string, defaultValue string) string {
 	v := os.Getenv(key)
 	if v == "" {
 		return defaultValue
@@ -14,7 +14,7 @@ func GetStringEnv(key string, defaultValue string) string {
 	return v
 }
 
-func GetIntEnv(key string, defaultValue int) int {
+func GetInt(key string, defaultValue int) int {
 	value := defaultValue
 	if v, err := strconv.Atoi(os.Getenv(key)); err == nil {
 		value = v
@@ -22,7 +22,7 @@ func GetIntEnv(key string, defaultValue int) int {
 	return value
 }
 
-func GetBoolEnv(key string, defaultValue bool) bool {
+func GetBool(key string, defaultValue bool) bool {
 	envVal := strings.ToLower(os.Getenv(key))
 	if defaultValue {
 		return envVal != "false"

@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/a179346/robert-go-monorepo/pkg/flushworker"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
+	"github.com/a179346/robert-go-monorepo/pkg/workerpool"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type RabbitMQLogger struct {
-	worker   *flushworker.FlushWorker[gohf_extended.LogData]
-	conn     *amqp.Connection
-	channels []*amqp.Channel
+	workerPool *workerpool.WorkerPool[gohf_extended.LogData]
+	conn       *amqp.Connection
+	channels   []*amqp.Channel
 }
 
 func New(conn *amqp.Connection, exchange string) *RabbitMQLogger {
@@ -25,7 +25,7 @@ func New(conn *amqp.Connection, exchange string) *RabbitMQLogger {
 		channels: make([]*amqp.Channel, concurrency),
 	}
 
-	worker := flushworker.New(func(logData gohf_extended.LogData, goRoutineId int) {
+	workerPool := workerpool.New(func(logData gohf_extended.LogData, goRoutineId int) {
 		body, err := json.Marshal(logData)
 		if err != nil {
 			return
@@ -56,17 +56,17 @@ func New(conn *amqp.Connection, exchange string) *RabbitMQLogger {
 			time.Sleep(time.Duration(retryCnt*2) * time.Second)
 		}
 	}, concurrency, 1024)
-	logger.worker = worker
+	logger.workerPool = workerPool
 
 	return logger
 }
 
-func (logger *RabbitMQLogger) Write(logData gohf_extended.LogData) {
-	logger.worker.AddJob(logData)
+func (logger *RabbitMQLogger) Dispatch(logData gohf_extended.LogData) {
+	logger.workerPool.Enqueue(logData)
 }
 
 func (logger *RabbitMQLogger) Close() {
-	logger.worker.Close()
+	logger.workerPool.Close()
 	logger.conn.Close()
 }
 

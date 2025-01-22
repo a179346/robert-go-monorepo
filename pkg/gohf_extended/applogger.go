@@ -8,14 +8,14 @@ import (
 	"github.com/ztrue/tracerr"
 )
 
-type Logger interface {
-	Write(logData LogData)
+type AppLogger interface {
+	Dispatch(logData LogData)
 }
 
-var logger Logger
+var appLogger AppLogger
 
-func SetLogger(l Logger) {
-	logger = l
+func SetAppLogger(logger AppLogger) {
+	appLogger = logger
 }
 
 var appId string
@@ -51,7 +51,7 @@ type LogDataResponse struct {
 }
 
 func log(w http.ResponseWriter, req *gohf.Request, status int, body interface{}, err error) {
-	if logger == nil {
+	if appLogger == nil {
 		return
 	}
 
@@ -84,5 +84,5 @@ func log(w http.ResponseWriter, req *gohf.Request, status int, body interface{},
 		},
 	}
 
-	logger.Write(logData)
+	appLogger.Dispatch(logData)
 }

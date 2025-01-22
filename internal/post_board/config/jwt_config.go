@@ -10,8 +10,8 @@ type JwtConfig struct {
 var jwtConfig JwtConfig
 
 func initJwtConfig() {
-	jwtConfig.Secret = []byte(env_helper.GetStringEnv("JWT_SECRET", "my1-jwt2-3secret"))
-	jwtConfig.ExpireSeconds = env_helper.GetIntEnv("JWT_EXPIRE_SECONDS", 3600)
+	jwtConfig.Secret = []byte(env_helper.GetString("JWT_SECRET", "my1-jwt2-3secret"))
+	jwtConfig.ExpireSeconds = env_helper.GetInt("JWT_EXPIRE_SECONDS", 3600)
 }
 
 func GetJwtConfig() JwtConfig {

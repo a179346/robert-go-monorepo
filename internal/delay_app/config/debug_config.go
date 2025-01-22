@@ -9,7 +9,7 @@ type DebugConfig struct {
 var debugConfig DebugConfig
 
 func initDebugConfig() {
-	debugConfig.ResponseErrorDetail = env_helper.GetBoolEnv("DEBUG_RESPONSE_ERROR_DETAIL", true)
+	debugConfig.ResponseErrorDetail = env_helper.GetBool("DEBUG_RESPONSE_ERROR_DETAIL", true)
 }
 
 func GetDebugConfig() DebugConfig {
