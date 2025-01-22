@@ -20,12 +20,12 @@ func New[T any](handle func(v T, goRoutineId int), concurrency int, bufferLength
 	wg.Add(concurrency)
 
 	for i := 0; i < concurrency; i++ {
-		go func() {
+		go func(goRoutineId int) {
 			for v := range workerPool.buf {
-				workerPool.handle(v, i)
+				workerPool.handle(v, goRoutineId)
 			}
 			wg.Done()
-		}()
+		}(i)
 	}
 
 	go func() {
