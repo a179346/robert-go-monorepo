@@ -2,7 +2,6 @@ package rabbitmq_consumerpool
 
 import (
 	"context"
-	"time"
 
 	ampq "github.com/rabbitmq/amqp091-go"
 )
@@ -37,10 +36,11 @@ func (consumer *Consumer) Serve(ctx context.Context) error {
 		}
 
 		select {
+		case <-ctx.Done():
+			return nil
+
 		case d := <-msgs:
 			consumer.handler.Handle(d)
-
-		case <-time.After(20 * time.Millisecond):
 		}
 	}
 }
