@@ -36,8 +36,7 @@ func (u AuthUseCase) loginHandler(c *gohf.Context) gohf.Response {
 
 	token, err := u.authCommands.login(c.Req.Context(), body.Email, body.Password)
 	if err != nil {
-		unwrapedErr := tracerr.Unwrap(err)
-		if errors.Is(unwrapedErr, errUserNotFound) || errors.Is(unwrapedErr, errWrongPassword) {
+		if errors.Is(err, errUserNotFound) || errors.Is(err, errWrongPassword) {
 			return gohf_extended.NewErrorResponse(
 				http.StatusNotFound,
 				"User not found",

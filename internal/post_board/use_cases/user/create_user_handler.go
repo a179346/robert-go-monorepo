@@ -43,8 +43,7 @@ func (u UserUseCase) createUserHandler(c *gohf.Context) gohf.Response {
 		body.Password,
 	)
 	if err != nil {
-		unwrappedErr := tracerr.Unwrap(err)
-		if errors.Is(unwrappedErr, errDuplicatedEmail) {
+		if errors.Is(err, errDuplicatedEmail) {
 			return gohf_extended.NewErrorResponse(
 				http.StatusConflict,
 				"email has been taken",

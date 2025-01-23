@@ -8,14 +8,13 @@ import (
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/gohf-http/gohf/v6"
 	"github.com/gohf-http/gohf/v6/response"
-	"github.com/ztrue/tracerr"
 )
 
 func (fs FileStoreUseCase) downloadHandler(c *gohf.Context) gohf.Response {
 	filename := c.Req.GetQuery("filename")
 	filepath, err := fs.fileStoreQueries.download(filename)
 	if err != nil {
-		if errors.Is(tracerr.Unwrap(err), ErrFileNotFound) {
+		if errors.Is(err, ErrFileNotFound) {
 			return gohf_extended.NewErrorResponse(
 				http.StatusNotFound,
 				"file not found",

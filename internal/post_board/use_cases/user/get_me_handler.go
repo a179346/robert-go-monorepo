@@ -31,8 +31,7 @@ func (u UserUseCase) getMeHandler(c *gohf.Context) gohf.Response {
 
 	user, err := u.userQueries.findUserById(c.Req.Context(), userId)
 	if err != nil {
-		unwrappedErr := tracerr.Unwrap(err)
-		if errors.Is(unwrappedErr, errUserNotFound) {
+		if errors.Is(err, errUserNotFound) {
 			return gohf_extended.NewErrorResponse(
 				http.StatusUnauthorized,
 				"User not found",
