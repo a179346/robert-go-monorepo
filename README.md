@@ -1,34 +1,36 @@
 # How to develop post-board
 
-## 1. start the dev dependencies
+## 1. Start dev dependencies
 
 ```sh
 make -f make.post_board docker_run_dev_dependencies
 ```
 
 The above command will start the following services:
-- `postgres`
-- `rabbitmq`
-- `elastic search`
-- `kibana`
+- [PostgreSQL](https://www.postgresql.org/)
+- [RabbitMQ](https://www.rabbitmq.com/)
+- [Elasticsearch](https://www.elastic.co/elasticsearch)
+- [Kibana](https://www.elastic.co/kibana)
 
-## 2. run the database migration
+## 2. Run the database migration
 
 ```sh
 make -f make.post_board local_run_migration_up
 ```
 
-## 3. start the post-board app & logging system
+## 3. Start post-board
 
+Start post-board app
 ```sh
 make -f make.post_board local_run_app
 ```
 
+Start logging system
 ```sh
 make -f make.post_board local_run_logging
 ```
 
-## 4. test the Login API
+## 4. Test Login API
 
 ```sh
 curl --location 'http://localhost:8082/auth/login' \
@@ -39,7 +41,7 @@ curl --location 'http://localhost:8082/auth/login' \
 }'
 ```
 
-## 5. configure Kibana
+## 5. Configure Kibana
 
 1. (Sidebar) Analytics > Discover
 2. Create data view
