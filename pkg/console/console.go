@@ -1,6 +1,7 @@
 package console
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -17,25 +18,35 @@ var warningLog = log.New(os.Stdout, yellow+"WARNING "+reset, flag)
 var errorLog = log.New(os.Stderr, red+"ERROR "+reset, flag)
 
 func Info(v ...any) {
-	infoLog.Println(v...)
+	println(infoLog, v...)
 }
 
 func Infof(format string, v ...any) {
-	infoLog.Printf(format, v...)
+	printf(infoLog, format, v...)
 }
 
 func Warn(v ...any) {
-	warningLog.Println(v...)
+	println(warningLog, v...)
 }
 
 func Warnf(format string, v ...any) {
-	warningLog.Printf(format, v...)
+	printf(warningLog, format, v...)
 }
 
 func Error(v ...any) {
-	errorLog.Println(v...)
+	println(errorLog, v...)
 }
 
 func Errorf(format string, v ...any) {
-	errorLog.Printf(format, v...)
+	printf(errorLog, format, v...)
+}
+
+func println(logger *log.Logger, v ...any) {
+	var b []byte
+	_ = logger.Output(3, string(fmt.Appendln(b, v...)))
+}
+
+func printf(logger *log.Logger, format string, v ...any) {
+	var b []byte
+	_ = logger.Output(3, string(fmt.Appendf(b, format, v...)))
 }
