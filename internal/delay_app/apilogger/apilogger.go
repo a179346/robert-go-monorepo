@@ -1,4 +1,4 @@
-package delay_app_applogger
+package delay_app_apilogger
 
 import (
 	delay_app_config "github.com/a179346/robert-go-monorepo/internal/delay_app/config"
@@ -6,8 +6,8 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-func GetAppLogger() *iologger.IoLogger {
-	config := delay_app_config.GetLoggerConfig()
+func GetApiLogger() *iologger.IoLogger {
+	config := delay_app_config.GetLoggingConfig()
 	if !config.Enable {
 		return nil
 	}

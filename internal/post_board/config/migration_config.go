@@ -10,13 +10,12 @@ type MigrationConfig struct {
 
 var migrationConfig MigrationConfig
 
-func initMigrationConfig() {
+func init() {
 	migrationConfig.FolderPath = env_helper.GetString("MIGRATION_FOLDER_PATH", "internal/post_board/migrations")
 	migrationConfig.Verbose = env_helper.GetBool("MIGRATION_VERBOSE", true)
 	migrationConfig.Up = env_helper.GetBool("MIGRATION_UP", true)
 }
 
 func GetMigrationConfig() MigrationConfig {
-	initAll()
 	return migrationConfig
 }

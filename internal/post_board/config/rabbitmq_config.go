@@ -16,7 +16,7 @@ type RabbitMQConfig struct {
 
 var rabbitMQConfig RabbitMQConfig
 
-func initRabbitMQConfig() {
+func init() {
 	rabbitMQConfig.Host = env_helper.GetString("RABBITMQ_HOST", "localhost")
 	rabbitMQConfig.Port = env_helper.GetInt("RABBITMQ_PORT", 5672)
 	rabbitMQConfig.User = env_helper.GetString("RABBITMQ_USER", "post-board-user")
@@ -32,6 +32,5 @@ func initRabbitMQConfig() {
 }
 
 func GetRabbitMQConfig() RabbitMQConfig {
-	initAll()
 	return rabbitMQConfig
 }

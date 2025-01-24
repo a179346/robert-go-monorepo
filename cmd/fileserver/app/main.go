@@ -7,8 +7,7 @@ import (
 	"os"
 	"time"
 
-	fileserver_applogger "github.com/a179346/robert-go-monorepo/internal/fileserver/applogger"
-	_ "github.com/a179346/robert-go-monorepo/internal/fileserver/config"
+	fileserver_apilogger "github.com/a179346/robert-go-monorepo/internal/fileserver/apilogger"
 	fileserver_config "github.com/a179346/robert-go-monorepo/internal/fileserver/config"
 	fileserver_server "github.com/a179346/robert-go-monorepo/internal/fileserver/server"
 	filestore_use_case "github.com/a179346/robert-go-monorepo/internal/fileserver/use_cases/filestore"
@@ -28,16 +27,17 @@ func main() {
 func run() error {
 	tracerr.DefaultCap = 8
 
-	gohf_extended.SetAppId("fileserver")
+	gohf_extended.SetAppId(fileserver_config.GetAppConfig().ID)
+	gohf_extended.SetAppVersion(fileserver_config.GetAppConfig().Version)
 	gohf_extended.SetReponseErrorDetail(fileserver_config.GetDebugConfig().ResponseErrorDetail)
-	appLogger := fileserver_applogger.GetAppLogger()
-	if appLogger != nil {
+	apiLogger := fileserver_apilogger.GetApiLogger()
+	if apiLogger != nil {
 		defer func() {
 			console.Info("Shutting down app logger...")
 			time.Sleep(2 * time.Second)
-			appLogger.Close()
+			apiLogger.Close()
 		}()
-		gohf_extended.SetAppLogger(appLogger)
+		gohf_extended.SetApiLogger(apiLogger)
 	}
 
 	server := fileserver_server.New(

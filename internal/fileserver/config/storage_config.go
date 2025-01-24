@@ -13,13 +13,12 @@ type StorageConfig struct {
 
 var storageConfig StorageConfig
 
-func initStorageConfig() {
+func init() {
 	storageConfig.RootPath = env_helper.GetString("STORAGE_ROOT_PATH", "./storage/fileserver")
 
 	storageConfig.StoreRootPath = filepath.Join(storageConfig.RootPath, "store")
 }
 
 func GetStorageConfig() StorageConfig {
-	initAll()
 	return storageConfig
 }

@@ -46,12 +46,7 @@ func (res ErrorResponse) Error() string {
 }
 
 func (res ErrorResponse) Send(w http.ResponseWriter, req *gohf.Request) {
-	if errors.Is(req.RootContext().Err(), context.Canceled) {
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(res.Status)
 
 	body := ErrorResponseData{
 		Status:  res.Status,
@@ -60,11 +55,17 @@ func (res ErrorResponse) Send(w http.ResponseWriter, req *gohf.Request) {
 	if responseErrorDetail {
 		body.Detail = tracerr.Sprint(res.Err)
 	}
+	bodyBytes, _ := json.Marshal(body)
 
-	if appLogger != nil {
-		log(w, req, res.Status, body, res.Err)
+	if apiLogger != nil {
+		log(w, req, res.Status, bodyBytes, res.Err)
 	}
 
+	if errors.Is(req.RootContext().Err(), context.Canceled) {
+		return
+	}
+
+	w.WriteHeader(res.Status)
 	//nolint:errcheck
-	json.NewEncoder(w).Encode(body)
+	w.Write(bodyBytes)
 }

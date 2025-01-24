@@ -12,7 +12,7 @@ type DBConfig struct {
 
 var dbConfig DBConfig
 
-func initDBConfig() {
+func init() {
 	dbConfig.Host = env_helper.GetString("DB_HOST", "localhost")
 	dbConfig.Port = env_helper.GetInt("DB_PORT", 5432)
 	dbConfig.Database = env_helper.GetString("DB_DATABASE", "post-board")
@@ -21,6 +21,5 @@ func initDBConfig() {
 }
 
 func GetDBConfig() DBConfig {
-	initAll()
 	return dbConfig
 }

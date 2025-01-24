@@ -39,12 +39,15 @@ curl --location 'http://localhost:8082/auth/login' \
     "email": "admin@google.com",
     "password": "secret123"
 }'
+# Expected Result: {"data":{"token":"this_suppose_to_be_a_long_jwt_token_string"}}
 ```
 
 ## 5. Configure Kibana
 
-1. (Sidebar) Analytics > Discover
-2. Create data view
+1. Go to `http://localhost:5601`
+2. (Sidebar) Analytics > Discover
+3. Create data view
    - Name: `post-board-api`
    - Index Pattern: `post-board-api-*`
    - Timestamp field: `startTime`
+   - Click `Save data view to Kibana`

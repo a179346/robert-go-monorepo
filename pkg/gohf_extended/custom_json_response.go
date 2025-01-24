@@ -26,17 +26,18 @@ func NewCustomJsonResponse[T interface{}](statusCode int, data T) CutsomJsonResp
 }
 
 func (res CutsomJsonResponse[T]) Send(w http.ResponseWriter, req *gohf.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	bodyBytes, _ := json.Marshal(res.Data)
+
+	if apiLogger != nil {
+		log(w, req, res.Status, bodyBytes, nil)
+	}
+
 	if errors.Is(req.RootContext().Err(), context.Canceled) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(res.Status)
-
-	if appLogger != nil {
-		log(w, req, res.Status, res.Data, nil)
-	}
-
 	//nolint:errcheck
-	json.NewEncoder(w).Encode(res.Data)
+	w.Write(bodyBytes)
 }

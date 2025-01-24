@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	post_board_applogger "github.com/a179346/robert-go-monorepo/internal/post_board/applogger"
+	post_board_apilogger "github.com/a179346/robert-go-monorepo/internal/post_board/apilogger"
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/database/dbhelper"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/providers/post_provider"
@@ -32,19 +32,20 @@ func main() {
 func run() error {
 	tracerr.DefaultCap = 8
 
-	gohf_extended.SetAppId("post_board")
+	gohf_extended.SetAppId(post_board_config.GetAppConfig().ID)
+	gohf_extended.SetAppVersion(post_board_config.GetAppConfig().Version)
 	gohf_extended.SetReponseErrorDetail(post_board_config.GetDebugConfig().ResponseErrorDetail)
-	appLogger, err := post_board_applogger.GetAppLogger()
+	apiLogger, err := post_board_apilogger.GetApiLogger()
 	if err != nil {
-		return fmt.Errorf("GetAppLogger error: %w", err)
+		return fmt.Errorf("GetApiLogger error: %w", err)
 	}
-	if appLogger != nil {
+	if apiLogger != nil {
 		defer func() {
 			console.Info("Shutting down app logger...")
 			time.Sleep(2 * time.Second)
-			appLogger.Close()
+			apiLogger.Close()
 		}()
-		gohf_extended.SetAppLogger(appLogger)
+		gohf_extended.SetApiLogger(apiLogger)
 	}
 
 	db, err := dbhelper.Open()

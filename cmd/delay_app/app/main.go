@@ -7,8 +7,7 @@ import (
 	"os"
 	"time"
 
-	delay_app_applogger "github.com/a179346/robert-go-monorepo/internal/delay_app/applogger"
-	_ "github.com/a179346/robert-go-monorepo/internal/delay_app/config"
+	delay_app_apilogger "github.com/a179346/robert-go-monorepo/internal/delay_app/apilogger"
 	delay_app_config "github.com/a179346/robert-go-monorepo/internal/delay_app/config"
 	delay_app_server "github.com/a179346/robert-go-monorepo/internal/delay_app/server"
 	delay_use_case "github.com/a179346/robert-go-monorepo/internal/delay_app/use_cases/delay"
@@ -28,16 +27,17 @@ func main() {
 func run() error {
 	tracerr.DefaultCap = 8
 
-	gohf_extended.SetAppId("delay_app")
+	gohf_extended.SetAppId(delay_app_config.GetAppConfig().ID)
+	gohf_extended.SetAppVersion(delay_app_config.GetAppConfig().Version)
 	gohf_extended.SetReponseErrorDetail(delay_app_config.GetDebugConfig().ResponseErrorDetail)
-	appLogger := delay_app_applogger.GetAppLogger()
-	if appLogger != nil {
+	apiLogger := delay_app_apilogger.GetApiLogger()
+	if apiLogger != nil {
 		defer func() {
 			console.Info("Shutting down app logger...")
 			time.Sleep(2 * time.Second)
-			appLogger.Close()
+			apiLogger.Close()
 		}()
-		gohf_extended.SetAppLogger(appLogger)
+		gohf_extended.SetApiLogger(apiLogger)
 	}
 
 	server := delay_app_server.New(

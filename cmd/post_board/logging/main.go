@@ -36,10 +36,10 @@ func run(ctx context.Context) error {
 	}()
 
 	rabbitMQConfig := post_board_config.GetRabbitMQConfig()
-	loggerConfig := post_board_config.GetLoggerConfig()
+	loggingConfig := post_board_config.GetLoggingConfig()
 
 	cfg := elasticsearch.Config{
-		Addresses: []string{loggerConfig.ElasticSearchAddress},
+		Addresses: []string{loggingConfig.ElasticSearchAddress},
 	}
 	es, err := elasticsearch.NewClient(cfg)
 	if err != nil {
@@ -52,11 +52,11 @@ func run(ctx context.Context) error {
 	}
 	defer conn.Close()
 
-	concurrency := loggerConfig.ConsumerConcurrency
+	concurrency := loggingConfig.ConsumerConcurrency
 	consumerPool := rabbitmq_consumerpool.New(
 		conn,
 		&handlerImpl{
-			sourceQueue: loggerConfig.ConsumerSourceQueue,
+			sourceQueue: loggingConfig.ConsumerSourceQueue,
 			es:          es,
 		},
 		concurrency,
@@ -87,7 +87,7 @@ func (handler *handlerImpl) Consume(ch *amqp.Channel) (<-chan amqp.Delivery, err
 func (handler *handlerImpl) Handle(d amqp.Delivery) {
 	bodyBytes := d.Body
 
-	var data gohf_extended.LogData
+	var data gohf_extended.ApiLogData
 	err := json.Unmarshal(bodyBytes, &data)
 	if err != nil {
 		//nolint:errcheck

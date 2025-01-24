@@ -9,12 +9,12 @@ import (
 )
 
 type IoLogger struct {
-	workerPool *workerpool.WorkerPool[gohf_extended.LogData]
+	workerPool *workerpool.WorkerPool[gohf_extended.ApiLogData]
 	writer     io.WriteCloser
 }
 
 func New(writer io.WriteCloser) *IoLogger {
-	workerPool := workerpool.New(func(logData gohf_extended.LogData, goRoutineId int) {
+	workerPool := workerpool.New(func(logData gohf_extended.ApiLogData, goRoutineId int) {
 		bytes, err := json.Marshal(logData)
 		if err != nil {
 			return
@@ -30,7 +30,7 @@ func New(writer io.WriteCloser) *IoLogger {
 	}
 }
 
-func (logger *IoLogger) Dispatch(logData gohf_extended.LogData) {
+func (logger *IoLogger) Dispatch(logData gohf_extended.ApiLogData) {
 	logger.workerPool.Enqueue(logData)
 }
 

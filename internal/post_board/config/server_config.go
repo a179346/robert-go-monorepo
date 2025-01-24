@@ -8,11 +8,10 @@ type ServerConfig struct {
 
 var serverConfig ServerConfig
 
-func initServerConfig() {
+func init() {
 	serverConfig.Port = env_helper.GetInt("SERVER_PORT", 8082)
 }
 
 func GetServerConfig() ServerConfig {
-	initAll()
 	return serverConfig
 }

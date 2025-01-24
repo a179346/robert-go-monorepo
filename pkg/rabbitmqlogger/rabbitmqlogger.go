@@ -11,7 +11,7 @@ import (
 )
 
 type RabbitMQLogger struct {
-	workerPool *workerpool.WorkerPool[gohf_extended.LogData]
+	workerPool *workerpool.WorkerPool[gohf_extended.ApiLogData]
 	conn       *amqp.Connection
 	channels   []*amqp.Channel
 }
@@ -25,7 +25,7 @@ func New(conn *amqp.Connection, exchange string) *RabbitMQLogger {
 		channels: make([]*amqp.Channel, concurrency),
 	}
 
-	workerPool := workerpool.New(func(logData gohf_extended.LogData, goRoutineId int) {
+	workerPool := workerpool.New(func(logData gohf_extended.ApiLogData, goRoutineId int) {
 		body, err := json.Marshal(logData)
 		if err != nil {
 			return
@@ -61,7 +61,7 @@ func New(conn *amqp.Connection, exchange string) *RabbitMQLogger {
 	return logger
 }
 
-func (logger *RabbitMQLogger) Dispatch(logData gohf_extended.LogData) {
+func (logger *RabbitMQLogger) Dispatch(logData gohf_extended.ApiLogData) {
 	logger.workerPool.Enqueue(logData)
 }
 

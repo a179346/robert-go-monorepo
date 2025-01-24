@@ -1,4 +1,4 @@
-package post_board_applogger
+package post_board_apilogger
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func GetAppLogger() (*rabbitmqlogger.RabbitMQLogger, error) {
-	loggingConfig := post_board_config.GetLoggerConfig()
+func GetApiLogger() (*rabbitmqlogger.RabbitMQLogger, error) {
+	loggingConfig := post_board_config.GetLoggingConfig()
 	if !loggingConfig.Enable {
 		return nil, nil
 	}

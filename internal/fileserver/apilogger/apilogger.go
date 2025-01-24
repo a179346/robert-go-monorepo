@@ -1,4 +1,4 @@
-package fileserver_applogger
+package fileserver_apilogger
 
 import (
 	fileserver_config "github.com/a179346/robert-go-monorepo/internal/fileserver/config"
@@ -6,8 +6,8 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-func GetAppLogger() *iologger.IoLogger {
-	config := fileserver_config.GetLoggerConfig()
+func GetApiLogger() *iologger.IoLogger {
+	config := fileserver_config.GetLoggingConfig()
 	if !config.Enable {
 		return nil
 	}
