@@ -1,15 +1,21 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/pkg/console"
+	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/a179346/robert-go-monorepo/pkg/rabbitmq_consumerpool"
+	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/go-elasticsearch/v8/esapi"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -30,6 +36,15 @@ func run(ctx context.Context) error {
 	}()
 
 	rabbitMQConfig := post_board_config.GetRabbitMQConfig()
+	loggerConfig := post_board_config.GetLoggerConfig()
+
+	cfg := elasticsearch.Config{
+		Addresses: []string{loggerConfig.ElasticSearchAddress},
+	}
+	es, err := elasticsearch.NewClient(cfg)
+	if err != nil {
+		return fmt.Errorf("elasticsearch.NewClient error: %w", err)
+	}
 
 	conn, err := amqp.Dial(rabbitMQConfig.Url)
 	if err != nil {
@@ -37,10 +52,13 @@ func run(ctx context.Context) error {
 	}
 	defer conn.Close()
 
-	concurrency := post_board_config.GetLoggerConfig().ConsumerConcurrency
+	concurrency := loggerConfig.ConsumerConcurrency
 	consumerPool := rabbitmq_consumerpool.New(
 		conn,
-		&handlerImpl{},
+		&handlerImpl{
+			sourceQueue: loggerConfig.ConsumerSourceQueue,
+			es:          es,
+		},
 		concurrency,
 	)
 
@@ -49,11 +67,14 @@ func run(ctx context.Context) error {
 	return nil
 }
 
-type handlerImpl struct{}
+type handlerImpl struct {
+	sourceQueue string
+	es          *elasticsearch.Client
+}
 
 func (handler *handlerImpl) Consume(ch *amqp.Channel) (<-chan amqp.Delivery, error) {
 	return ch.Consume(
-		post_board_config.GetLoggerConfig().ConsumerSourceQueue,
+		handler.sourceQueue,
 		"",
 		false,
 		false,
@@ -64,7 +85,34 @@ func (handler *handlerImpl) Consume(ch *amqp.Channel) (<-chan amqp.Delivery, err
 }
 
 func (handler *handlerImpl) Handle(d amqp.Delivery) {
-	console.Info(string(d.Body))
+	bodyBytes := d.Body
+
+	var data gohf_extended.LogData
+	err := json.Unmarshal(bodyBytes, &data)
+	if err != nil {
+		//nolint:errcheck
+		d.Nack(false, false)
+		return
+	}
+
+	startTime := time.UnixMilli(data.StartUnixMs)
+	req := esapi.IndexRequest{
+		Index:      fmt.Sprintf("post-board-api-%s", startTime.Format("20060102")),
+		DocumentID: data.ID,
+		Body:       bytes.NewReader(bodyBytes),
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	res, err := req.Do(ctx, handler.es)
+	if err != nil {
+		//nolint:errcheck
+		d.Nack(false, true)
+		return
+	}
+	defer res.Body.Close()
+
 	//nolint:errcheck
 	d.Ack(false)
 }

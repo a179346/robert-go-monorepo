@@ -1,50 +1,34 @@
-DB_HOST ?= localhost
-DB_PORT ?= 5432
-DB_DATABASE ?= post-board
-DB_USER ?= post-board-user
-DB_PASSWORD ?= mysecretpassword
+ENV_FILE_PATH ?= ./env/post_board.env
 
-.PHONY: docker_run_db
-docker_run_db:
-	docker run --rm --name post-board-postgres \
-		-p $(DB_PORT):5432 \
-		-v /${PWD}/storage/post-board-db/data:/var/lib/postgresql/data \
-		-e POSTGRES_DB="$(DB_DATABASE)" \
-		-e POSTGRES_USER="$(DB_USER)" \
-		-e POSTGRES_PASSWORD="$(DB_PASSWORD)" \
-		postgres:17.2-alpine3.21
+EVAL_ENV ?= eval $(shell cat $(ENV_FILE_PATH))
 
-.PHONY: docker_run_rabbitmq
-docker_run_rabbitmq:
-	docker run --rm --name post-board-rabbitmq \
-		--hostname post-board-rabbitmq \
-		-p 5672:5672 -p 15672:15672 \
-		-v /${PWD}/storage/post-board-rabbitmq:/var/lib/rabbitmq \
-		-e RABBITMQ_DEFAULT_USER="post-board-user" \
-		-e RABBITMQ_DEFAULT_PASS="mymqpass" \
-		rabbitmq:4.0.5-management-alpine
+.PHONY: docker_run_dev_dependencies
+docker_run_dev_dependencies:
+	docker-compose --env-file $(ENV_FILE_PATH) -f docker-composes/post-board/dev-dependencies.yml up
 
-JET_GEN_OUTPUT_PATH ?= ./internal/post_board/database/.jet_gen
+.PHONY: local_run_app
+local_run_app:
+	$(EVAL_ENV) go run ./cmd/post_board/app
+
+.PHONY: local_run_logging
+local_run_logging:
+	$(EVAL_ENV) go run ./cmd/post_board/logging
+
+.PHONY: local_run_migration_up
+local_run_migration_up:
+	$(EVAL_ENV) MIGRATION_UP=true go run ./cmd/post_board/migration
+
+.PHONY: local_run_migration_down
+local_run_migration_down:
+	$(EVAL_ENV) MIGRATION_UP=false go run ./cmd/post_board/migration
 
 .PHONY: gen_jet_sql_builder
 gen_jet_sql_builder:
-	jet -dsn=postgresql://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_DATABASE)?sslmode=disable \
+	. $(ENV_FILE_PATH) && jet -dsn=postgresql://$${DB_USER}:$${DB_PASSWORD}@$${DB_HOST}:$${DB_PORT}/$${DB_DATABASE}?sslmode=disable \
 		-schema=public \
 		-rel-model-path=./model \
 		-rel-table-path=./table \
 		-rel-view-path=./view \
 		-rel-enum-path=./enum \
-		-ignore-tables=schema_migrations \
-		-path=$(JET_GEN_OUTPUT_PATH)
-
-.PHONY: local_run_app
-local_run_app:
-	go run ./cmd/post_board/app
-
-.PHONY: local_run_migration_up
-local_run_migration_up:
-	MIGRATION_UP=true go run ./cmd/post_board/migration
-
-.PHONY: local_run_migration_down
-local_run_migration_down:
-	MIGRATION_UP=false go run ./cmd/post_board/migration
+		-ignore-tables=goose_db_version \
+		-path=./internal/post_board/database/.jet_gen

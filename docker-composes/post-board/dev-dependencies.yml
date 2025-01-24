@@ -1,0 +1,48 @@
+name: post-board
+
+services:
+  db:
+    image: postgres:17.2-alpine3.21
+    container_name: ${COMPOSE_PROJECT_NAME}-postgres
+    ports:
+      - ${DB_PORT}:5432
+    volumes:
+      - /${PWD}/storage/post-board-db/data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+  rabbitmq:
+    image: rabbitmq:4.0.5-management-alpine
+    container_name: ${COMPOSE_PROJECT_NAME}-rabbitmq
+    hostname: ${COMPOSE_PROJECT_NAME}-rabbitmq
+    ports:
+      - ${RABBITMQ_PORT}:5672
+      - 15672:15672
+    volumes:
+      - /${PWD}/storage/post-board-rabbitmq:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.3
+    container_name: ${COMPOSE_PROJECT_NAME}-es
+    ports:
+      - 9200:9200
+    volumes:
+      - /${PWD}/storage/post-board-es/data01:/usr/share/elasticsearch/data
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+    deploy:
+      resources:
+        limits:
+          memory: 1GB
+
+  kibana:
+    image: kibana:8.16.3
+    container_name: ${COMPOSE_PROJECT_NAME}-kibana
+    ports:
+      - 5601:5601
