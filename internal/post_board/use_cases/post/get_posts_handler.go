@@ -33,6 +33,7 @@ func (u PostUseCase) getPostsHandler(c *gohf.Context) gohf.Response {
 			http.StatusInternalServerError,
 			"Something went wrong",
 			err,
+			true,
 		)
 	}
 

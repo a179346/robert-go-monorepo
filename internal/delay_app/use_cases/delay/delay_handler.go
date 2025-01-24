@@ -20,6 +20,7 @@ func (u DelayUseCase) delayHandler(c *gohf.Context) gohf.Response {
 			http.StatusBadRequest,
 			fmt.Sprintf("Delay should be integer between 0 and 60000. got: %v", delayMs),
 			tracerr.Errorf("parse delay error: %w", err),
+			false,
 		)
 	}
 
@@ -28,6 +29,7 @@ func (u DelayUseCase) delayHandler(c *gohf.Context) gohf.Response {
 			http.StatusBadRequest,
 			fmt.Sprintf("Delay should be integer between 0 and 60000. got: %v", ms),
 			tracerr.Errorf("Delay should be integer between 0 and 60000. got: %v", ms),
+			false,
 		)
 	}
 
@@ -37,6 +39,7 @@ func (u DelayUseCase) delayHandler(c *gohf.Context) gohf.Response {
 			http.StatusInternalServerError,
 			"Something went wrong",
 			err,
+			true,
 		)
 	}
 

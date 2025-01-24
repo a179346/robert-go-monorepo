@@ -19,12 +19,14 @@ func (fs FileStoreUseCase) downloadHandler(c *gohf.Context) gohf.Response {
 				http.StatusNotFound,
 				"file not found",
 				err,
+				false,
 			)
 		}
 		return gohf_extended.NewErrorResponse(
 			http.StatusInternalServerError,
 			"Something went wrong",
 			err,
+			true,
 		)
 	}
 

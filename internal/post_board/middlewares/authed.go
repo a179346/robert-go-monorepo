@@ -17,6 +17,7 @@ func AuthedMiddleware(c *gohf.Context) gohf.Response {
 			http.StatusUnauthorized,
 			"Unauthorized",
 			tracerr.New("token is required"),
+			false,
 		)
 	}
 
@@ -26,6 +27,7 @@ func AuthedMiddleware(c *gohf.Context) gohf.Response {
 			http.StatusUnauthorized,
 			"Unauthorized",
 			tracerr.Errorf("jwt parse error: %w", err),
+			false,
 		)
 	}
 

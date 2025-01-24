@@ -28,16 +28,18 @@ func (err ErrorResponseData) Error() string {
 }
 
 type ErrorResponse struct {
-	Status  int
-	Message string
-	Err     error
+	Status     int
+	Message    string
+	Err        error
+	Unexpected bool
 }
 
-func NewErrorResponse(statusCode int, message string, err error) ErrorResponse {
+func NewErrorResponse(statusCode int, message string, err error, unexpected bool) ErrorResponse {
 	return ErrorResponse{
-		Status:  statusCode,
-		Message: message,
-		Err:     err,
+		Status:     statusCode,
+		Message:    message,
+		Err:        err,
+		Unexpected: unexpected,
 	}
 }
 
@@ -58,7 +60,7 @@ func (res ErrorResponse) Send(w http.ResponseWriter, req *gohf.Request) {
 	bodyBytes, _ := json.Marshal(body)
 
 	if apiLogger != nil {
-		log(w, req, res.Status, bodyBytes, res.Err)
+		log(w, req, res.Status, bodyBytes, res.Err, res.Unexpected)
 	}
 
 	if errors.Is(req.RootContext().Err(), context.Canceled) {

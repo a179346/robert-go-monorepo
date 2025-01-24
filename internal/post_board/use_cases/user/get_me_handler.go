@@ -26,6 +26,7 @@ func (u UserUseCase) getMeHandler(c *gohf.Context) gohf.Response {
 			http.StatusInternalServerError,
 			"Something went wrong",
 			tracerr.New("failed to get user id"),
+			true,
 		)
 	}
 
@@ -36,12 +37,14 @@ func (u UserUseCase) getMeHandler(c *gohf.Context) gohf.Response {
 				http.StatusUnauthorized,
 				"User not found",
 				err,
+				false,
 			)
 		}
 		return gohf_extended.NewErrorResponse(
 			http.StatusInternalServerError,
 			"Something went wrong",
 			err,
+			true,
 		)
 	}
 

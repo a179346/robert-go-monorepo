@@ -22,6 +22,7 @@ func (u AuthUseCase) loginHandler(c *gohf.Context) gohf.Response {
 			http.StatusInternalServerError,
 			"Something went wrong",
 			tracerr.New("Failed to get body value"),
+			true,
 		)
 	}
 
@@ -31,6 +32,7 @@ func (u AuthUseCase) loginHandler(c *gohf.Context) gohf.Response {
 			http.StatusBadRequest,
 			err.Error(),
 			tracerr.Errorf("body valdiation error: %w", err),
+			false,
 		)
 	}
 
@@ -41,12 +43,14 @@ func (u AuthUseCase) loginHandler(c *gohf.Context) gohf.Response {
 				http.StatusNotFound,
 				"User not found",
 				err,
+				false,
 			)
 		}
 		return gohf_extended.NewErrorResponse(
 			http.StatusInternalServerError,
 			"Something went wrong",
 			err,
+			true,
 		)
 	}
 

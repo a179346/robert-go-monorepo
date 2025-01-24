@@ -22,6 +22,7 @@ func (u PostUseCase) createPostHandler(c *gohf.Context) gohf.Response {
 			http.StatusInternalServerError,
 			"Something went wrong",
 			tracerr.New("failed to get user id"),
+			true,
 		)
 	}
 
@@ -31,6 +32,7 @@ func (u PostUseCase) createPostHandler(c *gohf.Context) gohf.Response {
 			http.StatusInternalServerError,
 			"Something went wrong",
 			tracerr.New("failed to get body value"),
+			true,
 		)
 	}
 
@@ -40,6 +42,7 @@ func (u PostUseCase) createPostHandler(c *gohf.Context) gohf.Response {
 			http.StatusBadRequest,
 			err.Error(),
 			tracerr.Errorf("body valdiation error: %w", err),
+			false,
 		)
 	}
 
@@ -53,6 +56,7 @@ func (u PostUseCase) createPostHandler(c *gohf.Context) gohf.Response {
 			http.StatusInternalServerError,
 			"Something went wrong",
 			err,
+			true,
 		)
 	}
 

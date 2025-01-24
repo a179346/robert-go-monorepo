@@ -30,7 +30,7 @@ func (res CutsomJsonResponse[T]) Send(w http.ResponseWriter, req *gohf.Request) 
 	bodyBytes, _ := json.Marshal(res.Data)
 
 	if apiLogger != nil {
-		log(w, req, res.Status, bodyBytes, nil)
+		log(w, req, res.Status, bodyBytes, nil, false)
 	}
 
 	if errors.Is(req.RootContext().Err(), context.Canceled) {

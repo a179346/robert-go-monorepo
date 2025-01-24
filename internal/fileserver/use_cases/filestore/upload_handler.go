@@ -19,6 +19,7 @@ func (fs FileStoreUseCase) uploadHandler(c *gohf.Context) gohf.Response {
 			http.StatusBadRequest,
 			"failed to read blob",
 			tracerr.Errorf("read blob error: %w", err),
+			false,
 		)
 	}
 	defer blob.Close()
@@ -29,6 +30,7 @@ func (fs FileStoreUseCase) uploadHandler(c *gohf.Context) gohf.Response {
 			http.StatusBadRequest,
 			fmt.Sprintf("offset should be non-negative integer. got: %v", offset),
 			tracerr.Errorf("offset should be non-negative integer. got: %v", offset),
+			false,
 		)
 	}
 
@@ -38,6 +40,7 @@ func (fs FileStoreUseCase) uploadHandler(c *gohf.Context) gohf.Response {
 			http.StatusBadRequest,
 			fmt.Sprintf("length should be non-negative integer. got: %v", length),
 			tracerr.Errorf("length should be non-negative integer. got: %v", length),
+			false,
 		)
 	}
 
@@ -50,6 +53,7 @@ func (fs FileStoreUseCase) uploadHandler(c *gohf.Context) gohf.Response {
 			http.StatusBadRequest,
 			fmt.Sprintf("isLastChunk should be either true or false. got: %v", v),
 			tracerr.Errorf("isLastChunk should be either true or false. got: %v", v),
+			false,
 		)
 	}
 
@@ -59,6 +63,7 @@ func (fs FileStoreUseCase) uploadHandler(c *gohf.Context) gohf.Response {
 			http.StatusBadRequest,
 			"filename is required",
 			tracerr.New("filename is required"),
+			false,
 		)
 	}
 
@@ -75,6 +80,7 @@ func (fs FileStoreUseCase) uploadHandler(c *gohf.Context) gohf.Response {
 			http.StatusInternalServerError,
 			"Something went wrong",
 			err,
+			true,
 		)
 	}
 

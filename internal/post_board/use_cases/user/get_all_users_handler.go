@@ -25,6 +25,7 @@ func (u UserUseCase) getAllUsersHandler(c *gohf.Context) gohf.Response {
 			http.StatusInternalServerError,
 			"Something went wrong",
 			err,
+			true,
 		)
 	}
 

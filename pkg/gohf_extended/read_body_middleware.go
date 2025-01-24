@@ -17,6 +17,7 @@ func ReadBodyMiddleware(c *gohf.Context) gohf.Response {
 			http.StatusInternalServerError,
 			"Something went wrong",
 			tracerr.Errorf("read body failed: %w", err),
+			true,
 		)
 	}
 

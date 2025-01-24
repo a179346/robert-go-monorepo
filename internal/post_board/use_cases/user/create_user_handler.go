@@ -24,6 +24,7 @@ func (u UserUseCase) createUserHandler(c *gohf.Context) gohf.Response {
 			http.StatusInternalServerError,
 			"Something went wrong",
 			tracerr.New("failed to get body value"),
+			true,
 		)
 	}
 
@@ -33,6 +34,7 @@ func (u UserUseCase) createUserHandler(c *gohf.Context) gohf.Response {
 			http.StatusBadRequest,
 			err.Error(),
 			tracerr.Errorf("body validation error: %w", err),
+			false,
 		)
 	}
 
@@ -48,6 +50,7 @@ func (u UserUseCase) createUserHandler(c *gohf.Context) gohf.Response {
 				http.StatusConflict,
 				"email has been taken",
 				err,
+				false,
 			)
 		}
 
@@ -55,6 +58,7 @@ func (u UserUseCase) createUserHandler(c *gohf.Context) gohf.Response {
 			http.StatusInternalServerError,
 			"Something went wrong",
 			err,
+			true,
 		)
 	}
 

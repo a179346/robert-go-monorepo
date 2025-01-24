@@ -40,6 +40,7 @@ type ApiLogData struct {
 	EndTime     string             `json:"endTime"`
 	ElapsedMs   int64              `json:"elapsedMs"`
 	Error       string             `json:"error"`
+	Unexpected  bool               `json:"unexpected"`
 	Req         ApiLogDataRequest  `json:"req"`
 	Res         ApiLogDataResponse `json:"res"`
 }
@@ -58,7 +59,7 @@ type ApiLogDataResponse struct {
 	Body   string              `json:"body"`
 }
 
-func log(w http.ResponseWriter, req *gohf.Request, status int, body []byte, err error) {
+func log(w http.ResponseWriter, req *gohf.Request, status int, body []byte, err error, unexpected bool) {
 	if apiLogger == nil {
 		return
 	}
@@ -80,6 +81,7 @@ func log(w http.ResponseWriter, req *gohf.Request, status int, body []byte, err 
 		EndTime:     endTime.Format(time.RFC3339),
 		ElapsedMs:   elapsedMs,
 		Error:       tracerr.Sprint(err),
+		Unexpected:  unexpected,
 		Req: ApiLogDataRequest{
 			Uri:        req.RequestURI(),
 			Method:     req.Method(),
