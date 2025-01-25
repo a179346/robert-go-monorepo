@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -19,9 +20,10 @@ import (
 
 func main() {
 	if err := run(); err != nil {
-		console.Errorf("%v", err)
+		console.Errorf("Exit 1: %v", err)
 		os.Exit(1)
 	}
+	console.Info("Exit 0")
 }
 
 func run() error {
@@ -57,7 +59,7 @@ func run() error {
 
 	serverListenErrCh := make(chan error)
 	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			serverListenErrCh <- fmt.Errorf("Error starting server: %w", err)
 		}
 	}()
