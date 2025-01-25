@@ -32,14 +32,18 @@ type ErrorResponse struct {
 	Message    string
 	Err        error
 	Unexpected bool
+
+	bodyBytes []byte
 }
 
-func NewErrorResponse(statusCode int, message string, err error, unexpected bool) ErrorResponse {
-	return ErrorResponse{
+func NewErrorResponse(statusCode int, message string, err error, unexpected bool) *ErrorResponse {
+	return &ErrorResponse{
 		Status:     statusCode,
 		Message:    message,
 		Err:        err,
 		Unexpected: unexpected,
+
+		bodyBytes: nil,
 	}
 }
 
@@ -48,7 +52,31 @@ func (res ErrorResponse) Error() string {
 }
 
 func (res ErrorResponse) Send(w http.ResponseWriter, req *gohf.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	if errors.Is(req.RootContext().Err(), context.Canceled) {
+		return
+	}
+
+	res.setHeader(w.Header())
+	w.WriteHeader(res.Status)
+	//nolint:errcheck
+	w.Write(res.getBodyBytes())
+}
+
+func (res *ErrorResponse) PrepareApiLog(header http.Header) (status int, bodyBytes []byte, logErr error, unexpected bool) {
+	res.setHeader(header)
+	return res.Status, res.getBodyBytes(), res.Err, res.Unexpected
+}
+
+func (res ErrorResponse) setHeader(header http.Header) {
+	if header.Get("Content-Type") == "" {
+		header.Set("Content-Type", "application/json")
+	}
+}
+
+func (res *ErrorResponse) getBodyBytes() []byte {
+	if res.bodyBytes != nil {
+		return res.bodyBytes
+	}
 
 	body := ErrorResponseData{
 		Status:  res.Status,
@@ -57,17 +85,7 @@ func (res ErrorResponse) Send(w http.ResponseWriter, req *gohf.Request) {
 	if responseErrorDetail {
 		body.Detail = tracerr.Sprint(res.Err)
 	}
-	bodyBytes, _ := json.Marshal(body)
+	res.bodyBytes, _ = json.Marshal(body)
 
-	if apiLogger != nil {
-		log(w, req, res.Status, bodyBytes, res.Err, res.Unexpected)
-	}
-
-	if errors.Is(req.RootContext().Err(), context.Canceled) {
-		return
-	}
-
-	w.WriteHeader(res.Status)
-	//nolint:errcheck
-	w.Write(bodyBytes)
+	return res.bodyBytes
 }

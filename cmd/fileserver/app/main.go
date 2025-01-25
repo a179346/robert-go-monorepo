@@ -28,10 +28,8 @@ func main() {
 
 func run() error {
 	tracerr.DefaultCap = 8
-
-	gohf_extended.SetAppId(fileserver_config.GetAppConfig().ID)
-	gohf_extended.SetAppVersion(fileserver_config.GetAppConfig().Version)
 	gohf_extended.SetReponseErrorDetail(fileserver_config.GetDebugConfig().ResponseErrorDetail)
+
 	apiLogger := fileserver_apilogger.GetApiLogger()
 	if apiLogger != nil {
 		defer func() {
@@ -39,12 +37,12 @@ func run() error {
 			time.Sleep(2 * time.Second)
 			apiLogger.Close()
 		}()
-		gohf_extended.SetApiLogger(apiLogger)
 	}
 
 	server := fileserver_server.New(
 		fileserver_server.Options{
 			FileStoreUseCase: filestore_use_case.New(),
+			ApiLogger:        apiLogger,
 		},
 	)
 

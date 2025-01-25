@@ -16,28 +16,46 @@ type CutsomJsonResponseData[T interface{}] struct {
 type CutsomJsonResponse[T interface{}] struct {
 	Status int
 	Data   CutsomJsonResponseData[T]
+
+	bodyBytes []byte
 }
 
-func NewCustomJsonResponse[T interface{}](statusCode int, data T) CutsomJsonResponse[T] {
-	return CutsomJsonResponse[T]{
+func NewCustomJsonResponse[T interface{}](statusCode int, data T) *CutsomJsonResponse[T] {
+	return &CutsomJsonResponse[T]{
 		Status: statusCode,
 		Data:   CutsomJsonResponseData[T]{data},
+
+		bodyBytes: nil,
 	}
 }
 
 func (res CutsomJsonResponse[T]) Send(w http.ResponseWriter, req *gohf.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	bodyBytes, _ := json.Marshal(res.Data)
-
-	if apiLogger != nil {
-		log(w, req, res.Status, bodyBytes, nil, false)
-	}
-
 	if errors.Is(req.RootContext().Err(), context.Canceled) {
 		return
 	}
 
+	res.setHeader(w.Header())
 	w.WriteHeader(res.Status)
 	//nolint:errcheck
-	w.Write(bodyBytes)
+	w.Write(res.getBodyBytes())
+}
+
+func (res *CutsomJsonResponse[T]) PrepareApiLog(header http.Header) (status int, bodyBytes []byte, logErr error, unexpected bool) {
+	res.setHeader(header)
+	return res.Status, res.getBodyBytes(), nil, false
+}
+
+func (res CutsomJsonResponse[T]) setHeader(header http.Header) {
+	if header.Get("Content-Type") == "" {
+		header.Set("Content-Type", "application/json")
+	}
+}
+
+func (res *CutsomJsonResponse[T]) getBodyBytes() []byte {
+	if res.bodyBytes != nil {
+		return res.bodyBytes
+	}
+
+	res.bodyBytes, _ = json.Marshal(res.Data)
+	return res.bodyBytes
 }

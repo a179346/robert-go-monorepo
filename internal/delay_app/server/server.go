@@ -15,6 +15,7 @@ import (
 
 type Options struct {
 	DelayUseCase delay_use_case.DelayUseCase
+	ApiLogger    gohf_extended.ApiLogger
 }
 
 type Server struct {
@@ -23,6 +24,11 @@ type Server struct {
 
 func New(options Options) *Server {
 	router := gohf.New()
+
+	if options.ApiLogger != nil {
+		appConfig := delay_app_config.GetAppConfig()
+		router.Use(gohf_extended.ApiLogMiddleware(appConfig.ID, appConfig.Version, options.ApiLogger))
+	}
 
 	router.Use(gohf.MaxBytesMiddleware(5 * 1024 * 1024))
 	router.Use(gohf_extended.RequestIdMiddleware)

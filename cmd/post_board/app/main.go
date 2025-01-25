@@ -33,10 +33,8 @@ func main() {
 
 func run() error {
 	tracerr.DefaultCap = 8
-
-	gohf_extended.SetAppId(post_board_config.GetAppConfig().ID)
-	gohf_extended.SetAppVersion(post_board_config.GetAppConfig().Version)
 	gohf_extended.SetReponseErrorDetail(post_board_config.GetDebugConfig().ResponseErrorDetail)
+
 	apiLogger, err := post_board_apilogger.GetApiLogger()
 	if err != nil {
 		return fmt.Errorf("GetApiLogger error: %w", err)
@@ -47,7 +45,6 @@ func run() error {
 			time.Sleep(2 * time.Second)
 			apiLogger.Close()
 		}()
-		gohf_extended.SetApiLogger(apiLogger)
 	}
 
 	db, err := dbhelper.Open()
@@ -69,6 +66,7 @@ func run() error {
 			AuthUseCase: auth_use_case.New(userProvider),
 			UserUseCase: user_use_case.New(userProvider),
 			PostUseCase: post_use_case.New(postProvider),
+			ApiLogger:   apiLogger,
 		},
 	)
 

@@ -28,10 +28,8 @@ func main() {
 
 func run() error {
 	tracerr.DefaultCap = 8
-
-	gohf_extended.SetAppId(delay_app_config.GetAppConfig().ID)
-	gohf_extended.SetAppVersion(delay_app_config.GetAppConfig().Version)
 	gohf_extended.SetReponseErrorDetail(delay_app_config.GetDebugConfig().ResponseErrorDetail)
+
 	apiLogger := delay_app_apilogger.GetApiLogger()
 	if apiLogger != nil {
 		defer func() {
@@ -39,12 +37,12 @@ func run() error {
 			time.Sleep(2 * time.Second)
 			apiLogger.Close()
 		}()
-		gohf_extended.SetApiLogger(apiLogger)
 	}
 
 	server := delay_app_server.New(
 		delay_app_server.Options{
 			DelayUseCase: delay_use_case.New(),
+			ApiLogger:    apiLogger,
 		},
 	)
 
