@@ -5,16 +5,16 @@ import (
 	"sync"
 
 	"github.com/a179346/robert-go-monorepo/pkg/console"
-	ampq "github.com/rabbitmq/amqp091-go"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type ConsumerPool struct {
-	conn        *ampq.Connection
+	conn        *amqp.Connection
 	handler     Handler
 	concurrency int
 }
 
-func New(conn *ampq.Connection, handler Handler, concurrency int) *ConsumerPool {
+func New(conn *amqp.Connection, handler Handler, concurrency int) *ConsumerPool {
 	return &ConsumerPool{
 		conn:        conn,
 		handler:     handler,

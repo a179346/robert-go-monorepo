@@ -3,15 +3,15 @@ package rabbitmq_consumerpool
 import (
 	"context"
 
-	ampq "github.com/rabbitmq/amqp091-go"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type Consumer struct {
-	conn    *ampq.Connection
+	conn    *amqp.Connection
 	handler Handler
 }
 
-func newConsumer(conn *ampq.Connection, handler Handler) *Consumer {
+func newConsumer(conn *amqp.Connection, handler Handler) *Consumer {
 	return &Consumer{
 		conn:    conn,
 		handler: handler,
