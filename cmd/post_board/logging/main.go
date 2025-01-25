@@ -46,16 +46,10 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("elasticsearch.NewClient error: %w", err)
 	}
 
-	conn, err := amqp.Dial(rabbitMQConfig.Url)
-	if err != nil {
-		return fmt.Errorf("amqp.Dial error: %w", err)
-	}
-	defer conn.Close()
-
 	concurrency := loggingConfig.ConsumerConcurrency
 	consumerPool := rabbitmq_consumerpool.New(
-		conn,
 		&handlerImpl{
+			url:         rabbitMQConfig.Url,
 			sourceQueue: loggingConfig.ConsumerSourceQueue,
 			es:          es,
 		},
@@ -68,8 +62,13 @@ func run(ctx context.Context) error {
 }
 
 type handlerImpl struct {
+	url         string
 	sourceQueue string
 	es          *elasticsearch.Client
+}
+
+func (handler *handlerImpl) Dial() (*amqp.Connection, error) {
+	return amqp.Dial(handler.url)
 }
 
 func (handler *handlerImpl) Consume(ch *amqp.Channel) (<-chan amqp.Delivery, error) {

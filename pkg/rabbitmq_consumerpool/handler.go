@@ -5,6 +5,7 @@ import (
 )
 
 type Handler interface {
+	Dial() (*amqp.Connection, error)
 	Consume(ch *amqp.Channel) (<-chan amqp.Delivery, error)
 	Handle(d amqp.Delivery)
 }
