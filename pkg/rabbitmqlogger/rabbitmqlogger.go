@@ -3,6 +3,7 @@ package rabbitmqlogger
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
@@ -11,18 +12,21 @@ import (
 )
 
 type RabbitMQLogger struct {
-	workerPool *workerpool.WorkerPool[gohf_extended.ApiLogData]
-	conn       *amqp.Connection
-	channels   []*amqp.Channel
+	workerPool        *workerpool.WorkerPool[gohf_extended.ApiLogData]
+	getAmqpConnection func() (*amqp.Connection, error)
+	channels          []*amqp.Channel
 }
 
-func New(conn *amqp.Connection, exchange string) *RabbitMQLogger {
+func New(
+	getAmqpConnection func() (*amqp.Connection, error),
+	exchange string,
+) *RabbitMQLogger {
 	const concurrency = 8
-	const maxRetryCnt = 5
+	retryDelays := []time.Duration{2, 2, 2, 4, 6, 8, 10, 12, 14, 20}
 
 	logger := &RabbitMQLogger{
-		conn:     conn,
-		channels: make([]*amqp.Channel, concurrency),
+		getAmqpConnection: getAmqpConnection,
+		channels:          make([]*amqp.Channel, concurrency),
 	}
 
 	workerPool := workerpool.New(func(logData gohf_extended.ApiLogData, goRoutineId int) {
@@ -31,7 +35,7 @@ func New(conn *amqp.Connection, exchange string) *RabbitMQLogger {
 			return
 		}
 
-		for retryCnt := 1; retryCnt <= maxRetryCnt; retryCnt++ {
+		for _, retryDelay := range retryDelays {
 			ch, err := logger.getChannel(goRoutineId)
 			if err == nil {
 				err = ch.Publish(
@@ -53,7 +57,7 @@ func New(conn *amqp.Connection, exchange string) *RabbitMQLogger {
 			if err == nil {
 				return
 			}
-			time.Sleep(time.Duration(retryCnt*2) * time.Second)
+			time.Sleep(retryDelay * time.Second)
 		}
 	}, concurrency, 1024)
 	logger.workerPool = workerPool
@@ -67,15 +71,30 @@ func (logger *RabbitMQLogger) Dispatch(logData gohf_extended.ApiLogData) {
 
 func (logger *RabbitMQLogger) Close() {
 	logger.workerPool.Close()
-	logger.conn.Close()
+	if conn, err := logger.getAmqpConnection(); err == nil {
+		conn.Close()
+	}
 }
 
 func (logger *RabbitMQLogger) getChannel(goRoutineId int) (*amqp.Channel, error) {
-	if logger.channels[goRoutineId] != nil {
-		return logger.channels[goRoutineId], nil
+	if ch := logger.channels[goRoutineId]; ch != nil && !ch.IsClosed() {
+		return ch, nil
 	}
 
-	ch, err := logger.conn.Channel()
+	var mu sync.Mutex
+	mu.Lock()
+	defer mu.Unlock()
+
+	if ch := logger.channels[goRoutineId]; ch != nil && !ch.IsClosed() {
+		return ch, nil
+	}
+
+	conn, err := logger.getAmqpConnection()
+	if err != nil {
+		return nil, fmt.Errorf("logger.getAmqpConnection error: %w", err)
+	}
+
+	ch, err := conn.Channel()
 	if err != nil {
 		return nil, fmt.Errorf("conn.Channel error: %w", err)
 	}

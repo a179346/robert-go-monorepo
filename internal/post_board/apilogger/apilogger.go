@@ -2,6 +2,7 @@ package post_board_apilogger
 
 import (
 	"fmt"
+	"sync"
 
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/pkg/rabbitmqlogger"
@@ -16,10 +17,32 @@ func GetApiLogger() (*rabbitmqlogger.RabbitMQLogger, error) {
 
 	rabbitMQConfig := post_board_config.GetRabbitMQConfig()
 
-	conn, err := amqp.Dial(rabbitMQConfig.Url)
+	var conn *amqp.Connection
+	var err error
+
+	conn, err = amqp.Dial(rabbitMQConfig.Url)
 	if err != nil {
 		return nil, fmt.Errorf("amqp.Dial error: %w", err)
 	}
 
-	return rabbitmqlogger.New(conn, loggingConfig.TargetExchange), nil
+	getAmqpConnection := func() (*amqp.Connection, error) {
+		if err == nil && !conn.IsClosed() {
+			return conn, nil
+		}
+
+		var mu sync.Mutex
+		mu.Lock()
+		defer mu.Unlock()
+
+		if err == nil && !conn.IsClosed() {
+			return conn, nil
+		}
+		conn, err = amqp.Dial(rabbitMQConfig.Url)
+		if err != nil {
+			err = fmt.Errorf("amqp.Dial error: %w", err)
+		}
+		return conn, err
+	}
+
+	return rabbitmqlogger.New(getAmqpConnection, loggingConfig.TargetExchange), nil
 }
