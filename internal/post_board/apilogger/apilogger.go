@@ -1,6 +1,7 @@
 package post_board_apilogger
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 
@@ -18,12 +19,7 @@ func GetApiLogger() (*rabbitmqlogger.RabbitMQLogger, error) {
 	rabbitMQConfig := post_board_config.GetRabbitMQConfig()
 
 	var conn *amqp.Connection
-	var err error
-
-	conn, err = amqp.Dial(rabbitMQConfig.Url)
-	if err != nil {
-		return nil, fmt.Errorf("amqp.Dial error: %w", err)
-	}
+	err := errors.New("amqp connection have not been initialized")
 
 	getAmqpConnection := func() (*amqp.Connection, error) {
 		if err == nil && !conn.IsClosed() {
