@@ -59,7 +59,7 @@ func New(
 			}
 			time.Sleep(retryDelay * time.Second)
 		}
-	}, concurrency, 1024)
+	}, concurrency, 1024, true)
 	logger.workerPool = workerPool
 
 	return logger

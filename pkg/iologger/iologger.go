@@ -22,7 +22,7 @@ func New(writer io.WriteCloser) *IoLogger {
 
 		//nolint:errcheck
 		writer.Write(append(bytes, '\n'))
-	}, 1, 1024)
+	}, 1, 1024, true)
 
 	return &IoLogger{
 		workerPool: workerPool,

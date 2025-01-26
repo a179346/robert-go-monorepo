@@ -5,16 +5,18 @@ import (
 )
 
 type WorkerPool[T any] struct {
-	buf     chan T
-	handle  func(v T, goRoutineId int)
-	stopped chan struct{}
+	buf                          chan T
+	handle                       func(v T, goRoutineId int)
+	stopped                      chan struct{}
+	discardingValueIfChannelFull bool
 }
 
-func New[T any](handle func(v T, goRoutineId int), concurrency int, bufferLength int) *WorkerPool[T] {
+func New[T any](handle func(v T, goRoutineId int), concurrency int, bufferLength int, discardingValueIfChannelFull bool) *WorkerPool[T] {
 	workerPool := &WorkerPool[T]{
-		buf:     make(chan T, bufferLength),
-		handle:  handle,
-		stopped: make(chan struct{}),
+		buf:                          make(chan T, bufferLength),
+		handle:                       handle,
+		stopped:                      make(chan struct{}),
+		discardingValueIfChannelFull: discardingValueIfChannelFull,
 	}
 	wg := new(sync.WaitGroup)
 	wg.Add(concurrency)
@@ -37,7 +39,14 @@ func New[T any](handle func(v T, goRoutineId int), concurrency int, bufferLength
 }
 
 func (workerPool *WorkerPool[T]) Enqueue(v T) {
-	workerPool.buf <- v
+	if workerPool.discardingValueIfChannelFull {
+		select {
+		case workerPool.buf <- v:
+		default:
+		}
+	} else {
+		workerPool.buf <- v
+	}
 }
 
 // Close closes the write to the buffer. Any accepted writes will be flushed. Any new writes will be rejected.
