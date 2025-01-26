@@ -16,6 +16,7 @@ type ApiLogData struct {
 	ID          string             `json:"id"`
 	App         string             `json:"app"`
 	AppVersion  string             `json:"appVersion"`
+	Timestamp   int64              `json:"@timestamp"`
 	StartUnixMs int64              `json:"startUnixMs"`
 	StartTime   string             `json:"startTime"`
 	EndUnixMs   int64              `json:"endUnixMs"`
@@ -65,15 +66,18 @@ func ApiLogMiddleware(appId string, appVersion string, apiLogger ApiLogger) gohf
 
 		startTime := c.Req.GetTimestamp()
 		endTime := time.Now()
-		elapsedMs := endTime.UnixMilli() - startTime.UnixMilli()
+		startUnixMs := startTime.UnixMilli()
+		endUnixMs := endTime.UnixMilli()
+		elapsedMs := endUnixMs - startUnixMs
 
 		logData := ApiLogData{
 			ID:          requestId.String(),
 			App:         appId,
 			AppVersion:  appVersion,
-			StartUnixMs: startTime.UnixMilli(),
+			Timestamp:   startUnixMs,
+			StartUnixMs: startUnixMs,
 			StartTime:   startTime.Format(time.RFC3339),
-			EndUnixMs:   endTime.UnixMilli(),
+			EndUnixMs:   endUnixMs,
 			EndTime:     endTime.Format(time.RFC3339),
 			ElapsedMs:   elapsedMs,
 			Error:       tracerr.Sprint(logErr),

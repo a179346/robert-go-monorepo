@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -46,12 +47,16 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("elasticsearch.NewClient error: %w", err)
 	}
 
+	_ = upsertILMLifecycle(ctx, es)
+	_ = upsertIndexTemplate(ctx, es)
+
 	concurrency := loggingConfig.ConsumerConcurrency
 	consumerPool := rabbitmq_consumerpool.New(
 		&handlerImpl{
 			url:         rabbitMQConfig.Url,
 			sourceQueue: loggingConfig.ConsumerSourceQueue,
 			es:          es,
+			indexPrefix: loggingConfig.ElasticSearchIndexPrefix,
 		},
 		concurrency,
 	)
@@ -61,10 +66,48 @@ func run(ctx context.Context) error {
 	return nil
 }
 
+func upsertILMLifecycle(ctx context.Context, es *elasticsearch.Client) error {
+	prefix := post_board_config.GetLoggingConfig().ElasticSearchIndexPrefix
+	policy := prefix + "30-days"
+	body := `{"policy":{"phases":{"hot":{"min_age":"0ms","actions":{}},"warm":{"min_age":"2d","actions":{}},"delete":{"min_age":"30d","actions":{"delete":{"delete_searchable_snapshot":true}}}},"deprecated":false}}`
+	upsertILMLifecycleReq := esapi.ILMPutLifecycleRequest{
+		Policy: policy,
+		Body:   strings.NewReader(body),
+	}
+	res, err := upsertILMLifecycleReq.Do(ctx, es)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	return nil
+}
+
+func upsertIndexTemplate(ctx context.Context, es *elasticsearch.Client) error {
+	prefix := post_board_config.GetLoggingConfig().ElasticSearchIndexPrefix
+	policy := prefix + "30-days"
+	indexPattern := prefix + "*"
+	body := fmt.Sprintf(
+		`{"template":{"settings":{"index":{"lifecycle":{"name":"%s"}}}},"index_patterns":["%s"],"data_stream":{}}`,
+		policy,
+		indexPattern,
+	)
+	upsertIndexTemplateReq := esapi.IndicesPutIndexTemplateRequest{
+		Name: post_board_config.GetLoggingConfig().ElasticSearchIndexPrefix,
+		Body: strings.NewReader(body),
+	}
+	res, err := upsertIndexTemplateReq.Do(ctx, es)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	return nil
+}
+
 type handlerImpl struct {
 	url         string
 	sourceQueue string
 	es          *elasticsearch.Client
+	indexPrefix string
 }
 
 func (handler *handlerImpl) Dial() (*amqp.Connection, error) {
@@ -94,10 +137,11 @@ func (handler *handlerImpl) Handle(d amqp.Delivery) {
 		return
 	}
 
-	startTime := time.UnixMilli(data.StartUnixMs)
+	timestamp := time.UnixMilli(data.Timestamp)
 	req := esapi.IndexRequest{
-		Index:      fmt.Sprintf("post-board-api-%s", startTime.Format("20060102")),
+		Index:      handler.indexPrefix + timestamp.Format("20060102"),
 		DocumentID: data.ID,
+		OpType:     "create",
 		Body:       bytes.NewReader(bodyBytes),
 	}
 
@@ -105,7 +149,7 @@ func (handler *handlerImpl) Handle(d amqp.Delivery) {
 	defer cancel()
 
 	res, err := req.Do(ctx, handler.es)
-	if err != nil {
+	if err != nil || res.StatusCode >= 400 {
 		//nolint:errcheck
 		d.Nack(false, true)
 		return
