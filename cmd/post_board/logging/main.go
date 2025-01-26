@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -47,9 +46,6 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("elasticsearch.NewClient error: %w", err)
 	}
 
-	_ = upsertILMLifecycle(ctx, es)
-	_ = upsertIndexTemplate(ctx, es)
-
 	concurrency := loggingConfig.ConsumerConcurrency
 	consumerPool := rabbitmq_consumerpool.New(
 		&handlerImpl{
@@ -63,43 +59,6 @@ func run(ctx context.Context) error {
 
 	console.Infof("Logging system is serving. concurrency: %v", concurrency)
 	consumerPool.Serve(ctx)
-	return nil
-}
-
-func upsertILMLifecycle(ctx context.Context, es *elasticsearch.Client) error {
-	prefix := post_board_config.GetLoggingConfig().ElasticSearchIndexPrefix
-	policy := prefix + "30-days"
-	body := `{"policy":{"phases":{"hot":{"min_age":"0ms","actions":{}},"warm":{"min_age":"2d","actions":{}},"delete":{"min_age":"30d","actions":{"delete":{"delete_searchable_snapshot":true}}}},"deprecated":false}}`
-	upsertILMLifecycleReq := esapi.ILMPutLifecycleRequest{
-		Policy: policy,
-		Body:   strings.NewReader(body),
-	}
-	res, err := upsertILMLifecycleReq.Do(ctx, es)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-	return nil
-}
-
-func upsertIndexTemplate(ctx context.Context, es *elasticsearch.Client) error {
-	prefix := post_board_config.GetLoggingConfig().ElasticSearchIndexPrefix
-	policy := prefix + "30-days"
-	indexPattern := prefix + "*"
-	body := fmt.Sprintf(
-		`{"template":{"settings":{"index":{"lifecycle":{"name":"%s"}}}},"index_patterns":["%s"],"data_stream":{}}`,
-		policy,
-		indexPattern,
-	)
-	upsertIndexTemplateReq := esapi.IndicesPutIndexTemplateRequest{
-		Name: post_board_config.GetLoggingConfig().ElasticSearchIndexPrefix,
-		Body: strings.NewReader(body),
-	}
-	res, err := upsertIndexTemplateReq.Do(ctx, es)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
 	return nil
 }
 

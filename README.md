@@ -49,5 +49,5 @@ curl --location 'http://localhost:8082/auth/login' \
 3. Create data view
    - Name: `post-board-api`
    - Index Pattern: `post-board-api-*`
-   - Timestamp field: `startTime`
+   - Timestamp field: `@timestamp` or `startTime`
    - Click `Save data view to Kibana`
