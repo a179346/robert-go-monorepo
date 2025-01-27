@@ -35,6 +35,7 @@ func New(options Options) *Server {
 		router.Use(gohf_extended.ApiLogMiddleware(appConfig.ID, appConfig.Version, options.ApiLogger))
 	}
 
+	router.Use(gohf_extended.RecoverMiddleware)
 	router.Use(gohf.MaxBytesMiddleware(5 * 1024 * 1024))
 	router.Use(gohf_extended.RequestIdMiddleware)
 	router.Use(gohf_extended.ReadBodyMiddleware)
