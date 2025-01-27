@@ -10,14 +10,16 @@ import (
 )
 
 type ConsumerPool struct {
-	handler     Handler
-	concurrency int
+	dial           DialFunc
+	handlerFactory HandlerFactory
+	concurrency    int
 }
 
-func New(handler Handler, concurrency int) *ConsumerPool {
+func New(dial DialFunc, handlerFactory HandlerFactory, concurrency int) *ConsumerPool {
 	return &ConsumerPool{
-		handler:     handler,
-		concurrency: concurrency,
+		dial:           dial,
+		handlerFactory: handlerFactory,
+		concurrency:    concurrency,
 	}
 }
 
@@ -35,7 +37,7 @@ func (consumerPool *ConsumerPool) dialAndServe(ctx context.Context) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	conn, err := consumerPool.handler.Dial()
+	conn, err := consumerPool.dial()
 	if err != nil {
 		return
 	}
@@ -50,7 +52,7 @@ func (consumerPool *ConsumerPool) dialAndServe(ctx context.Context) {
 
 	wg.Add(consumerPool.concurrency)
 	for i := 0; i < consumerPool.concurrency; i++ {
-		consumer := newConsumer(conn, consumerPool.handler)
+		consumer := newConsumer(conn, consumerPool.handlerFactory())
 		go func(consumer *Consumer) {
 			err := consumer.Serve(ctx)
 			if err != nil {

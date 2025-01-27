@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/signal"
@@ -11,11 +9,11 @@ import (
 	"time"
 
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
+	"github.com/a179346/robert-go-monorepo/internal/post_board/logging_helper"
 	"github.com/a179346/robert-go-monorepo/pkg/console"
-	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
+	"github.com/a179346/robert-go-monorepo/pkg/es_bulkwriter"
 	"github.com/a179346/robert-go-monorepo/pkg/rabbitmq_consumerpool"
 	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/elastic/go-elasticsearch/v8/esapi"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -48,11 +46,15 @@ func run(ctx context.Context) error {
 
 	concurrency := loggingConfig.ConsumerConcurrency
 	consumerPool := rabbitmq_consumerpool.New(
-		&handlerImpl{
-			url:         rabbitMQConfig.Url,
-			sourceQueue: loggingConfig.ConsumerSourceQueue,
-			es:          es,
-			indexPrefix: loggingConfig.ElasticSearchIndexPrefix,
+		func() (*amqp.Connection, error) {
+			return amqp.Dial(rabbitMQConfig.Url)
+		},
+		func() rabbitmq_consumerpool.Handler {
+			return logging_helper.NewHandler(
+				loggingConfig.ConsumerSourceQueue,
+				loggingConfig.ElasticSearchIndexPrefix,
+				es_bulkwriter.New(es, 300, 10*time.Second),
+			)
 		},
 		concurrency,
 	)
@@ -60,61 +62,4 @@ func run(ctx context.Context) error {
 	console.Infof("Logging system is serving. concurrency: %v", concurrency)
 	consumerPool.Serve(ctx)
 	return nil
-}
-
-type handlerImpl struct {
-	url         string
-	sourceQueue string
-	es          *elasticsearch.Client
-	indexPrefix string
-}
-
-func (handler *handlerImpl) Dial() (*amqp.Connection, error) {
-	return amqp.Dial(handler.url)
-}
-
-func (handler *handlerImpl) Consume(ch *amqp.Channel) (<-chan amqp.Delivery, error) {
-	return ch.Consume(
-		handler.sourceQueue,
-		"",
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
-}
-
-func (handler *handlerImpl) Handle(d amqp.Delivery) {
-	bodyBytes := d.Body
-
-	var data gohf_extended.ApiLogData
-	err := json.Unmarshal(bodyBytes, &data)
-	if err != nil {
-		//nolint:errcheck
-		d.Nack(false, false)
-		return
-	}
-
-	timestamp := time.UnixMilli(data.Timestamp)
-	req := esapi.IndexRequest{
-		Index:      handler.indexPrefix + timestamp.Format("20060102"),
-		DocumentID: data.ID,
-		OpType:     "create",
-		Body:       bytes.NewReader(bodyBytes),
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-
-	res, err := req.Do(ctx, handler.es)
-	if err != nil || res.StatusCode >= 400 {
-		//nolint:errcheck
-		d.Nack(false, true)
-		return
-	}
-	defer res.Body.Close()
-
-	//nolint:errcheck
-	d.Ack(false)
 }

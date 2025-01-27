@@ -36,7 +36,7 @@ func Up1737896590(ctx context.Context, tx *sql.Tx) error {
 		Body:   strings.NewReader(body),
 	}
 	res, err := upsertILMLifecycleReq.Do(ctx, es)
-	if err != nil || res.StatusCode >= 400 {
+	if err != nil || res.IsError() {
 		return fmt.Errorf("upsertILMLifecycleReq.Do error: %w", err)
 	}
 	defer func(Body io.ReadCloser) {
@@ -53,7 +53,7 @@ func Up1737896590(ctx context.Context, tx *sql.Tx) error {
 		Body: strings.NewReader(body),
 	}
 	res, err = upsertIndexTemplateReq.Do(ctx, es)
-	if err != nil || res.StatusCode >= 400 {
+	if err != nil || res.IsError() {
 		return fmt.Errorf("upsertIndexTemplateReq.Do error: %w", err)
 	}
 	defer func(Body io.ReadCloser) {
@@ -76,7 +76,7 @@ func Down1737896590(ctx context.Context, tx *sql.Tx) error {
 		Policy: policy,
 	}
 	res, err := deleteILMLifecycleReq.Do(ctx, es)
-	if err != nil || res.StatusCode >= 400 {
+	if err != nil || res.IsError() {
 		return fmt.Errorf("deleteILMLifecycleReq.Do error: %w", err)
 	}
 	defer func(Body io.ReadCloser) {
@@ -87,7 +87,7 @@ func Down1737896590(ctx context.Context, tx *sql.Tx) error {
 		Name: indexTemplate,
 	}
 	res, err = deleteIndexTemplateReq.Do(ctx, es)
-	if err != nil || res.StatusCode >= 400 {
+	if err != nil || res.IsError() {
 		return fmt.Errorf("deleteIndexTemplateReq.Do error: %w", err)
 	}
 	defer func(Body io.ReadCloser) {

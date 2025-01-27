@@ -29,6 +29,7 @@ func (consumer *Consumer) Serve(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	defer consumer.handler.Close()
 
 	for {
 		if ctx.Err() != nil {
