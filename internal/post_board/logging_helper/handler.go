@@ -11,20 +11,20 @@ import (
 )
 
 type Handler struct {
-	sourceQueue string
-	indexPrefix string
-	bulkWriter  *es_bulkrequester.BulkRequester
+	sourceQueue   string
+	indexPrefix   string
+	bulkRequester *es_bulkrequester.BulkRequester
 }
 
 func NewHandler(
 	sourceQueue string,
 	indexPrefix string,
-	bulkWriter *es_bulkrequester.BulkRequester,
+	bulkRequester *es_bulkrequester.BulkRequester,
 ) *Handler {
 	return &Handler{
-		sourceQueue: sourceQueue,
-		indexPrefix: indexPrefix,
-		bulkWriter:  bulkWriter,
+		sourceQueue:   sourceQueue,
+		indexPrefix:   indexPrefix,
+		bulkRequester: bulkRequester,
 	}
 }
 
@@ -44,8 +44,7 @@ func (handler *Handler) Handle(d amqp.Delivery) {
 	bodyBytes := d.Body
 
 	var data gohf_extended.ApiLogData
-	err := json.Unmarshal(bodyBytes, &data)
-	if err != nil {
+	if err := json.Unmarshal(bodyBytes, &data); err != nil {
 		//nolint:errcheck
 		d.Nack(false, false)
 		return
@@ -54,10 +53,10 @@ func (handler *Handler) Handle(d amqp.Delivery) {
 	timestamp := time.UnixMilli(data.Timestamp)
 	index := handler.indexPrefix + timestamp.Format("20060102")
 
-	meta := []byte(fmt.Sprintf(`{"create":{"_index":"%s,"_id":"%s"}}%s`, index, data.ID, "\n"))
+	meta := []byte(fmt.Sprintf(`{"create":{"_index":"%s","_id":"%s"}}%s`, index, data.ID, "\n"))
 	bodyBytes = append(bodyBytes, "\n"...)
 
-	handler.bulkWriter.AddRequest(
+	handler.bulkRequester.AddRequest(
 		meta,
 		bodyBytes,
 		es_bulkrequester.NewBulkItemEvent(
@@ -68,5 +67,5 @@ func (handler *Handler) Handle(d amqp.Delivery) {
 }
 
 func (handler *Handler) Close() {
-	handler.bulkWriter.Close()
+	handler.bulkRequester.Close()
 }
