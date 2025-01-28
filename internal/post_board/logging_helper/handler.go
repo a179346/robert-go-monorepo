@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/a179346/robert-go-monorepo/pkg/es_bulkwriter"
+	"github.com/a179346/robert-go-monorepo/pkg/es_bulkrequester"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -13,13 +13,13 @@ import (
 type Handler struct {
 	sourceQueue string
 	indexPrefix string
-	bulkWriter  *es_bulkwriter.BulkWriter
+	bulkWriter  *es_bulkrequester.BulkRequester
 }
 
 func NewHandler(
 	sourceQueue string,
 	indexPrefix string,
-	bulkWriter *es_bulkwriter.BulkWriter,
+	bulkWriter *es_bulkrequester.BulkRequester,
 ) *Handler {
 	return &Handler{
 		sourceQueue: sourceQueue,
@@ -60,7 +60,7 @@ func (handler *Handler) Handle(d amqp.Delivery) {
 	handler.bulkWriter.AddRequest(
 		meta,
 		bodyBytes,
-		es_bulkwriter.NewBulkWriteEvent(
+		es_bulkrequester.NewBulkItemEvent(
 			func() { _ = d.Ack(false) },
 			func() { _ = d.Nack(false, true) },
 		),

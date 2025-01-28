@@ -11,7 +11,7 @@ import (
 	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
 	"github.com/a179346/robert-go-monorepo/internal/post_board/logging_helper"
 	"github.com/a179346/robert-go-monorepo/pkg/console"
-	"github.com/a179346/robert-go-monorepo/pkg/es_bulkwriter"
+	"github.com/a179346/robert-go-monorepo/pkg/es_bulkrequester"
 	"github.com/a179346/robert-go-monorepo/pkg/rabbitmq_consumerpool"
 	"github.com/elastic/go-elasticsearch/v8"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -53,7 +53,7 @@ func run(ctx context.Context) error {
 			return logging_helper.NewHandler(
 				loggingConfig.ConsumerSourceQueue,
 				loggingConfig.ElasticSearchIndexPrefix,
-				es_bulkwriter.New(es, 300, 10*time.Second),
+				es_bulkrequester.New(es, 300, 10*time.Second),
 			)
 		},
 		concurrency,
