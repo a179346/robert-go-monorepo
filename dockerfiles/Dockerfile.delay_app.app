@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY pkg ./pkg
 COPY cmd ./cmd/delay_app/app
-COPY internal ./internal/delay_app
+COPY services ./services/delay_app
 
 RUN go build -o ./bin/main ./cmd/delay_app/app
 

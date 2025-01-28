@@ -8,13 +8,13 @@ import (
 	"os"
 	"time"
 
-	delay_app_apilogger "github.com/a179346/robert-go-monorepo/internal/delay_app/apilogger"
-	delay_app_config "github.com/a179346/robert-go-monorepo/internal/delay_app/config"
-	delay_app_server "github.com/a179346/robert-go-monorepo/internal/delay_app/server"
-	delay_use_case "github.com/a179346/robert-go-monorepo/internal/delay_app/use_cases/delay"
 	"github.com/a179346/robert-go-monorepo/pkg/console"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	"github.com/a179346/robert-go-monorepo/pkg/graceful_shutdown"
+	delay_app_apilogger "github.com/a179346/robert-go-monorepo/services/delay_app/apilogger"
+	delay_app_config "github.com/a179346/robert-go-monorepo/services/delay_app/config"
+	delay_app_server "github.com/a179346/robert-go-monorepo/services/delay_app/server"
+	delay_use_case "github.com/a179346/robert-go-monorepo/services/delay_app/use_cases/delay"
 	"github.com/ztrue/tracerr"
 )
 

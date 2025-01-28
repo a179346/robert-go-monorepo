@@ -8,11 +8,11 @@ import (
 	"syscall"
 	"time"
 
-	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
-	"github.com/a179346/robert-go-monorepo/internal/post_board/logging_helper"
 	"github.com/a179346/robert-go-monorepo/pkg/console"
 	"github.com/a179346/robert-go-monorepo/pkg/es_bulkrequester"
 	"github.com/a179346/robert-go-monorepo/pkg/rabbitmq_consumerpool"
+	post_board_config "github.com/a179346/robert-go-monorepo/services/post_board/config"
+	"github.com/a179346/robert-go-monorepo/services/post_board/logging_helper"
 	"github.com/elastic/go-elasticsearch/v8"
 	amqp "github.com/rabbitmq/amqp091-go"
 )

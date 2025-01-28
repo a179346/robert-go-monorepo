@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY pkg ./pkg
 COPY cmd ./cmd/fileserver/app
-COPY internal ./internal/fileserver
+COPY services ./services/fileserver
 
 RUN go build -o ./bin/main ./cmd/fileserver/app
 

@@ -7,10 +7,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	post_board_config "github.com/a179346/robert-go-monorepo/internal/post_board/config"
-	"github.com/a179346/robert-go-monorepo/internal/post_board/database/dbhelper"
-	_ "github.com/a179346/robert-go-monorepo/internal/post_board/migrations"
 	"github.com/a179346/robert-go-monorepo/pkg/console"
+	post_board_config "github.com/a179346/robert-go-monorepo/services/post_board/config"
+	"github.com/a179346/robert-go-monorepo/services/post_board/database/dbhelper"
+	_ "github.com/a179346/robert-go-monorepo/services/post_board/migrations"
 	"github.com/pressly/goose/v3"
 )
 
