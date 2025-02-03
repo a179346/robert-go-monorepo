@@ -1,8 +1,6 @@
 package delay_use_case
 
-import (
-	"github.com/gohf-http/gohf/v6"
-)
+import "github.com/gin-gonic/gin"
 
 type DelayUseCase struct {
 	delayQueries delayQueries
@@ -14,6 +12,6 @@ func New() DelayUseCase {
 	}
 }
 
-func (u DelayUseCase) AppendHandler(router *gohf.Router) {
-	router.GET("/{ms}", u.delayHandler)
+func (u DelayUseCase) AppendHandler(router *gin.RouterGroup) {
+	router.GET("/:ms", u.delayHandler)
 }

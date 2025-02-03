@@ -4,17 +4,17 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
+	"github.com/a179346/robert-go-monorepo/pkg/gin_extended"
 	"github.com/a179346/robert-go-monorepo/pkg/workerpool"
 )
 
 type IoLogger struct {
-	workerPool *workerpool.WorkerPool[gohf_extended.ApiLogData]
+	workerPool *workerpool.WorkerPool[gin_extended.ApiLogData]
 	writer     io.WriteCloser
 }
 
 func New(writer io.WriteCloser) *IoLogger {
-	workerPool := workerpool.New(func(logData gohf_extended.ApiLogData, goRoutineId int) {
+	workerPool := workerpool.New(func(logData gin_extended.ApiLogData, goRoutineId int) {
 		bytes, err := json.Marshal(logData)
 		if err != nil {
 			return
@@ -30,7 +30,7 @@ func New(writer io.WriteCloser) *IoLogger {
 	}
 }
 
-func (logger *IoLogger) Dispatch(logData gohf_extended.ApiLogData) {
+func (logger *IoLogger) Dispatch(logData gin_extended.ApiLogData) {
 	logger.workerPool.Enqueue(logData)
 }
 

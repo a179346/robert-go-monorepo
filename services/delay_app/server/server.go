@@ -6,16 +6,16 @@ import (
 	"net/http"
 
 	"github.com/a179346/robert-go-monorepo/pkg/console"
-	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
+	"github.com/a179346/robert-go-monorepo/pkg/gin_extended"
 	delay_app_config "github.com/a179346/robert-go-monorepo/services/delay_app/config"
 	delay_use_case "github.com/a179346/robert-go-monorepo/services/delay_app/use_cases/delay"
-	"github.com/gohf-http/gohf/v6"
+	"github.com/gin-gonic/gin"
 	"github.com/rs/cors"
 )
 
 type Options struct {
 	DelayUseCase delay_use_case.DelayUseCase
-	ApiLogger    gohf_extended.ApiLogger
+	ApiLogger    gin_extended.ApiLogger
 }
 
 type Server struct {
@@ -23,28 +23,28 @@ type Server struct {
 }
 
 func New(options Options) *Server {
-	router := gohf.New()
+	router := gin.Default()
+	router.Use(gin_extended.ResponseMiddleware)
 
 	if options.ApiLogger != nil {
 		appConfig := delay_app_config.GetAppConfig()
-		router.Use(gohf_extended.ApiLogMiddleware(appConfig.ID, appConfig.Version, options.ApiLogger))
+		router.Use(gin_extended.ApiLogMiddleware(appConfig.ID, appConfig.Version, options.ApiLogger))
 	}
 
-	router.Use(gohf_extended.RecoverMiddleware)
-	router.Use(gohf.MaxBytesMiddleware(5 * 1024 * 1024))
-	router.Use(gohf_extended.RequestIdMiddleware)
-	router.Use(gohf_extended.ReadBodyMiddleware)
+	router.Use(gin_extended.RecoverMiddleware)
+	router.Use(gin_extended.MaxBytesMiddleware(5 * 1024 * 1024))
+	router.Use(gin_extended.RequestIdMiddleware)
+	router.Use(gin_extended.ReadBodyMiddleware)
 
-	router.GET("/healthz", gohf_extended.HealthzHandler)
+	router.GET("/healthz", gin_extended.HealthzHandler)
 
-	options.DelayUseCase.AppendHandler(router.SubRouter("/delay"))
+	options.DelayUseCase.AppendHandler(router.Group("/delay"))
 
-	router.Use(gohf_extended.NotFoundHandler)
+	router.Use(gin_extended.NotFoundHandler)
 
-	mux := router.CreateServeMux()
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", delay_app_config.GetServerConfig().Port),
-		Handler: cors.AllowAll().Handler(mux),
+		Handler: cors.AllowAll().Handler(router),
 	}
 
 	return &Server{httpserver: server}
