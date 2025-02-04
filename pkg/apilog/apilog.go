@@ -1,7 +1,5 @@
 package apilog
 
-import "net/http"
-
 type Data struct {
 	ID          string       `json:"id"`
 	App         string       `json:"app"`
@@ -34,8 +32,4 @@ type DataResponse struct {
 
 type Logger interface {
 	Dispatch(data Data)
-}
-
-type Loggable interface {
-	PrepareApiLog(header http.Header) (status int, bodyBytes []byte, logErr error, unexpected bool)
 }

@@ -1,12 +1,17 @@
 package gohf_extended
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/a179346/robert-go-monorepo/pkg/apilog"
 	"github.com/gohf-http/gohf/v6"
 	"github.com/ztrue/tracerr"
 )
+
+type ApiLoggable interface {
+	PrepareApiLog(header http.Header) (status int, bodyBytes []byte, logErr error, unexpected bool)
+}
 
 func ApiLogMiddleware(appId string, appVersion string, apiLogger apilog.Logger) gohf.HandlerFunc {
 	return func(c *gohf.Context) gohf.Response {
@@ -16,7 +21,7 @@ func ApiLogMiddleware(appId string, appVersion string, apiLogger apilog.Logger) 
 			return res
 		}
 
-		apiLoggable, ok := res.(apilog.Loggable)
+		apiLoggable, ok := res.(ApiLoggable)
 		if !ok {
 			return res
 		}
