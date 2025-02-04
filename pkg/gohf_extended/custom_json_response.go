@@ -15,17 +15,16 @@ type CutsomJsonResponseData[T interface{}] struct {
 
 type CutsomJsonResponse[T interface{}] struct {
 	Status int
-	Data   CutsomJsonResponseData[T]
 
 	bodyBytes []byte
 }
 
 func NewCustomJsonResponse[T interface{}](statusCode int, data T) *CutsomJsonResponse[T] {
+	bodyBytes, _ := json.Marshal(CutsomJsonResponseData[T]{data})
 	return &CutsomJsonResponse[T]{
 		Status: statusCode,
-		Data:   CutsomJsonResponseData[T]{data},
 
-		bodyBytes: nil,
+		bodyBytes: bodyBytes,
 	}
 }
 
@@ -37,25 +36,16 @@ func (res CutsomJsonResponse[T]) Send(w http.ResponseWriter, req *gohf.Request) 
 	res.setHeader(w.Header())
 	w.WriteHeader(res.Status)
 	//nolint:errcheck
-	w.Write(res.getBodyBytes())
+	w.Write(res.bodyBytes)
 }
 
 func (res *CutsomJsonResponse[T]) PrepareApiLog(header http.Header) (status int, bodyBytes []byte, logErr error, unexpected bool) {
 	res.setHeader(header)
-	return res.Status, res.getBodyBytes(), nil, false
+	return res.Status, res.bodyBytes, nil, false
 }
 
 func (res CutsomJsonResponse[T]) setHeader(header http.Header) {
 	if header.Get("Content-Type") == "" {
 		header.Set("Content-Type", "application/json")
 	}
-}
-
-func (res *CutsomJsonResponse[T]) getBodyBytes() []byte {
-	if res.bodyBytes != nil {
-		return res.bodyBytes
-	}
-
-	res.bodyBytes, _ = json.Marshal(res.Data)
-	return res.bodyBytes
 }

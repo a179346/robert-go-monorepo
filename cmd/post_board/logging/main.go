@@ -53,7 +53,7 @@ func run(ctx context.Context) error {
 			return logging_helper.NewHandler(
 				loggingConfig.ConsumerSourceQueue,
 				loggingConfig.ElasticSearchIndexPrefix,
-				es_bulkrequester.New(es, 300, 10*time.Second),
+				es_bulkrequester.New(es, 500, 30*time.Second),
 			)
 		},
 		concurrency,
