@@ -40,13 +40,22 @@ func Error(c *gin.Context, statusCode int, message string, err error, unexpected
 }
 
 func newErrorResponse(statusCode int, message string, err error, unexpected bool) *ErrorResponse {
+	body := ErrorResponseData{
+		Status:  statusCode,
+		Message: message,
+	}
+	if responseErrorDetail {
+		body.Detail = tracerr.Sprint(err)
+	}
+	bodyBytes, _ := json.Marshal(body)
+
 	return &ErrorResponse{
 		Status:     statusCode,
 		Message:    message,
 		Err:        err,
 		Unexpected: unexpected,
 
-		bodyBytes: nil,
+		bodyBytes: bodyBytes,
 	}
 }
 
@@ -62,31 +71,14 @@ func (res ErrorResponse) Send(c *gin.Context) {
 	res.setHeader(c)
 	c.Writer.WriteHeader(res.Status)
 	//nolint:errcheck
-	c.Writer.Write(res.getBodyBytes())
+	c.Writer.Write(res.bodyBytes)
 }
 
 func (res *ErrorResponse) PrepareApiLog(c *gin.Context) (status int, bodyBytes []byte, logErr error, unexpected bool) {
 	res.setHeader(c)
-	return res.Status, res.getBodyBytes(), res.Err, res.Unexpected
+	return res.Status, res.bodyBytes, res.Err, res.Unexpected
 }
 
 func (res ErrorResponse) setHeader(c *gin.Context) {
 	c.Header("Content-Type", "application/json")
-}
-
-func (res *ErrorResponse) getBodyBytes() []byte {
-	if res.bodyBytes != nil {
-		return res.bodyBytes
-	}
-
-	body := ErrorResponseData{
-		Status:  res.Status,
-		Message: res.Message,
-	}
-	if responseErrorDetail {
-		body.Detail = tracerr.Sprint(res.Err)
-	}
-	res.bodyBytes, _ = json.Marshal(body)
-
-	return res.bodyBytes
 }
