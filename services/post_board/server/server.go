@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/a179346/robert-go-monorepo/pkg/apilog"
 	"github.com/a179346/robert-go-monorepo/pkg/console"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	post_board_config "github.com/a179346/robert-go-monorepo/services/post_board/config"
@@ -20,7 +21,7 @@ type Options struct {
 	AuthUseCase auth_use_case.AuthUseCase
 	UserUseCase user_use_case.UserUseCase
 	PostUseCase post_use_case.PostUseCase
-	ApiLogger   gohf_extended.ApiLogger
+	ApiLogger   apilog.Logger
 }
 
 type Server struct {

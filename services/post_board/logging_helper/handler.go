@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/a179346/robert-go-monorepo/pkg/apilog"
 	"github.com/a179346/robert-go-monorepo/pkg/es_bulkrequester"
-	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -43,7 +43,7 @@ func (handler *Handler) Consume(ch *amqp.Channel) (<-chan amqp.Delivery, error) 
 func (handler *Handler) Handle(d amqp.Delivery) {
 	bodyBytes := d.Body
 
-	var data gohf_extended.ApiLogData
+	var data apilog.Data
 	if err := json.Unmarshal(bodyBytes, &data); err != nil {
 		//nolint:errcheck
 		d.Nack(false, false)

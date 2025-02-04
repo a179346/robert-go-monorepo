@@ -6,13 +6,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
+	"github.com/a179346/robert-go-monorepo/pkg/apilog"
 	"github.com/a179346/robert-go-monorepo/pkg/workerpool"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type RabbitMQLogger struct {
-	workerPool        *workerpool.WorkerPool[gohf_extended.ApiLogData]
+	workerPool        *workerpool.WorkerPool[apilog.Data]
 	getAmqpConnection func() (*amqp.Connection, error)
 	channels          []*amqp.Channel
 }
@@ -29,8 +29,8 @@ func New(
 		channels:          make([]*amqp.Channel, concurrency),
 	}
 
-	workerPool := workerpool.New(func(logData gohf_extended.ApiLogData, goRoutineId int) {
-		body, err := json.Marshal(logData)
+	workerPool := workerpool.New(func(data apilog.Data, goRoutineId int) {
+		body, err := json.Marshal(data)
 		if err != nil {
 			return
 		}
@@ -44,12 +44,12 @@ func New(
 					false,
 					false,
 					amqp.Publishing{
-						MessageId:    logData.ID,
-						AppId:        logData.App,
+						MessageId:    data.ID,
+						AppId:        data.App,
 						ContentType:  "application/json",
 						DeliveryMode: 2,
 						Body:         body,
-						Timestamp:    time.UnixMilli(logData.StartUnixMs),
+						Timestamp:    time.UnixMilli(data.StartUnixMs),
 					},
 				)
 			}
@@ -65,8 +65,8 @@ func New(
 	return logger
 }
 
-func (logger *RabbitMQLogger) Dispatch(logData gohf_extended.ApiLogData) {
-	logger.workerPool.Enqueue(logData)
+func (logger *RabbitMQLogger) Dispatch(data apilog.Data) {
+	logger.workerPool.Enqueue(data)
 }
 
 func (logger *RabbitMQLogger) Close() {
