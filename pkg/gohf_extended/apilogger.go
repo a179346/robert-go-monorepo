@@ -1,52 +1,14 @@
 package gohf_extended
 
 import (
-	"net/http"
 	"time"
 
+	"github.com/a179346/robert-go-monorepo/pkg/apilog"
 	"github.com/gohf-http/gohf/v6"
 	"github.com/ztrue/tracerr"
 )
 
-type ApiLogger interface {
-	Dispatch(logData ApiLogData)
-}
-
-type ApiLogData struct {
-	ID          string             `json:"id"`
-	App         string             `json:"app"`
-	AppVersion  string             `json:"appVersion"`
-	Timestamp   int64              `json:"@timestamp"`
-	StartUnixMs int64              `json:"startUnixMs"`
-	StartTime   string             `json:"startTime"`
-	EndUnixMs   int64              `json:"endUnixMs"`
-	EndTime     string             `json:"endTime"`
-	ElapsedMs   int64              `json:"elapsedMs"`
-	Error       string             `json:"error"`
-	Unexpected  bool               `json:"unexpected"`
-	Req         ApiLogDataRequest  `json:"req"`
-	Res         ApiLogDataResponse `json:"res"`
-}
-
-type ApiLogDataRequest struct {
-	Uri        string              `json:"uri"`
-	Method     string              `json:"method"`
-	RemoteAddr string              `json:"remoteAddr"`
-	Header     map[string][]string `json:"header"`
-	Body       string              `json:"body"`
-}
-
-type ApiLogDataResponse struct {
-	Header map[string][]string `json:"header"`
-	Status int                 `json:"status"`
-	Body   string              `json:"body"`
-}
-
-type ApiLoggable interface {
-	PrepareApiLog(header http.Header) (status int, bodyBytes []byte, logErr error, unexpected bool)
-}
-
-func ApiLogMiddleware(appId string, appVersion string, apiLogger ApiLogger) gohf.HandlerFunc {
+func ApiLogMiddleware(appId string, appVersion string, apiLogger apilog.Logger) gohf.HandlerFunc {
 	return func(c *gohf.Context) gohf.Response {
 		res := c.Next()
 
@@ -54,7 +16,7 @@ func ApiLogMiddleware(appId string, appVersion string, apiLogger ApiLogger) gohf
 			return res
 		}
 
-		apiLoggable, ok := res.(ApiLoggable)
+		apiLoggable, ok := res.(apilog.Loggable)
 		if !ok {
 			return res
 		}
@@ -70,7 +32,7 @@ func ApiLogMiddleware(appId string, appVersion string, apiLogger ApiLogger) gohf
 		endUnixMs := endTime.UnixMilli()
 		elapsedMs := endUnixMs - startUnixMs
 
-		logData := ApiLogData{
+		data := apilog.Data{
 			ID:          requestId.String(),
 			App:         appId,
 			AppVersion:  appVersion,
@@ -82,21 +44,21 @@ func ApiLogMiddleware(appId string, appVersion string, apiLogger ApiLogger) gohf
 			ElapsedMs:   elapsedMs,
 			Error:       tracerr.Sprint(logErr),
 			Unexpected:  unexpected,
-			Req: ApiLogDataRequest{
+			Req: apilog.DataRequest{
 				Uri:        c.Req.RequestURI(),
 				Method:     c.Req.Method(),
 				RemoteAddr: c.Req.RemoteAddr(),
 				Header:     c.Req.GetHttpRequest().Header,
 				Body:       string(reqBodyBytes),
 			},
-			Res: ApiLogDataResponse{
+			Res: apilog.DataResponse{
 				Header: c.ResHeader(),
 				Status: status,
 				Body:   string(resBodyBytes),
 			},
 		}
 
-		apiLogger.Dispatch(logData)
+		apiLogger.Dispatch(data)
 
 		return res
 	}

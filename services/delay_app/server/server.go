@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/a179346/robert-go-monorepo/pkg/apilog"
 	"github.com/a179346/robert-go-monorepo/pkg/console"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
 	delay_app_config "github.com/a179346/robert-go-monorepo/services/delay_app/config"
@@ -15,7 +16,7 @@ import (
 
 type Options struct {
 	DelayUseCase delay_use_case.DelayUseCase
-	ApiLogger    gohf_extended.ApiLogger
+	ApiLogger    apilog.Logger
 }
 
 type Server struct {
