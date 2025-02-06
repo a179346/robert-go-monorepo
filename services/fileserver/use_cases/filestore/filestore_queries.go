@@ -24,7 +24,7 @@ func (fileStoreQueries fileStoreQueries) download(filename string) (string, erro
 	if err != nil {
 		return "", tracerr.Errorf("check exists error: %w", err)
 	}
-	if existsResult == filesystem.ExistsResultNotFound || existsResult == filesystem.ExistsResultDir {
+	if existsResult == filesystem.ExistsResults.NotFound || existsResult == filesystem.ExistsResults.Dir {
 		return "", tracerr.Wrap(ErrFileNotFound)
 	}
 

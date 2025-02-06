@@ -7,26 +7,34 @@ import (
 	"os"
 )
 
-type ExistsResult int
+type ExistsResult struct{ message string }
 
-const (
-	ExistsResultNotFound ExistsResult = 0
-	ExistsResultFile     ExistsResult = 1
-	ExistsResultDir      ExistsResult = 2
+type existsResults struct {
+	NotFound ExistsResult
+	File     ExistsResult
+	Dir      ExistsResult
+}
+
+var (
+	ExistsResults = existsResults{
+		NotFound: ExistsResult{"not found"},
+		File:     ExistsResult{"file"},
+		Dir:      ExistsResult{"dir"},
+	}
 )
 
 func Exists(path string) (ExistsResult, error) {
 	stat, err := os.Stat(path)
 	if err == nil {
 		if stat.IsDir() {
-			return ExistsResultDir, nil
+			return ExistsResults.Dir, nil
 		}
-		return ExistsResultFile, nil
+		return ExistsResults.File, nil
 	}
 	if errors.Is(err, fs.ErrNotExist) {
-		return ExistsResultNotFound, nil
+		return ExistsResults.NotFound, nil
 	}
-	return ExistsResultNotFound, err
+	return ExistsResults.NotFound, err
 }
 
 func EnsureDir(path string) error {
@@ -37,17 +45,17 @@ func EnsureDir(path string) error {
 
 	switch existsResult {
 
-	case ExistsResultDir:
+	case ExistsResults.Dir:
 		return nil
 
-	case ExistsResultFile:
+	case ExistsResults.File:
 		return errors.New("ensure dir failed: path is a file")
 
-	case ExistsResultNotFound:
+	case ExistsResults.NotFound:
 		return os.MkdirAll(path, os.ModePerm)
 
 	default:
-		return fmt.Errorf("unknown exists result: %d", existsResult)
+		return fmt.Errorf("unknown exists result: %v", existsResult)
 	}
 }
 
