@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "github.com/a179346/robert-go-monorepo/pb/calculator";
+
+package calculator;
+
+service Calculator {
+  rpc Divide (DivideRequest) returns (DivideResponse) {}
+}
+
+message DivideRequest {
+  double dividend = 1;
+  double divisor = 2;
+}
+
+message DivideResponse {
+  double Value = 1;
+}
