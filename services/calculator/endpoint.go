@@ -19,7 +19,7 @@ func NewEndpoints(s Service) Endpoints {
 
 type divideReq struct {
 	Dividend float64 `json:"dividend"`
-	Divisor  float64 `json:"divisor"`
+	Divisor  float64 `json:"divisor" validate:"required"`
 }
 
 type divideResp struct {

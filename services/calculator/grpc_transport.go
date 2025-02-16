@@ -5,22 +5,22 @@ import (
 	"errors"
 
 	calculatorPb "github.com/a179346/robert-go-monorepo/pb/calculator"
-	gt "github.com/go-kit/kit/transport/grpc"
+	grpctransport "github.com/go-kit/kit/transport/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type gRPCServer struct {
-	divide gt.Handler
+	divide grpctransport.Handler
 	calculatorPb.UnimplementedCalculatorServer
 }
 
 func NewGRPCServer(endpoints Endpoints) calculatorPb.CalculatorServer {
 	return &gRPCServer{
-		divide: gt.NewServer(
+		divide: grpctransport.NewServer(
 			endpoints.divide,
-			decodeDivideRequest,
-			encodeDivideResponse,
+			grpcDecodeDivideRequest,
+			grpcEncodeDivideResponse,
 		),
 	}
 }
@@ -39,7 +39,7 @@ func (s gRPCServer) Divide(ctx context.Context, req *calculatorPb.DivideRequest)
 	}
 }
 
-func decodeDivideRequest(_ context.Context, request interface{}) (interface{}, error) {
+func grpcDecodeDivideRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req, ok := request.(*calculatorPb.DivideRequest)
 	if !ok {
 		return nil, errors.New("invalid request body")
@@ -48,7 +48,7 @@ func decodeDivideRequest(_ context.Context, request interface{}) (interface{}, e
 	return divideReq{Dividend: req.Dividend, Divisor: req.Divisor}, nil
 }
 
-func encodeDivideResponse(_ context.Context, response interface{}) (interface{}, error) {
+func grpcEncodeDivideResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp, ok := response.(divideResp)
 	if !ok {
 		return nil, errors.New("invalid response body")
