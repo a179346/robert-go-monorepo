@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/a179346/robert-go-monorepo/pkg/console"
-	"github.com/a179346/robert-go-monorepo/pkg/graceful_shutdown"
+	"github.com/a179346/robert-go-monorepo/pkg/graceful"
 	"github.com/a179346/robert-go-monorepo/services/calculator"
 	"github.com/ztrue/tracerr"
 )
@@ -46,7 +46,7 @@ func run() error {
 	}()
 
 	select {
-	case signal := <-graceful_shutdown.ShutDown():
+	case signal := <-graceful.ShutDown():
 		console.Infof("Received signal: %v", signal)
 		return nil
 

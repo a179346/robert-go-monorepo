@@ -1,6 +1,6 @@
 package post_board_config
 
-import "github.com/a179346/robert-go-monorepo/pkg/env_helper"
+import "github.com/a179346/robert-go-monorepo/pkg/envhelper"
 
 type ServerConfig struct {
 	Port int
@@ -9,7 +9,7 @@ type ServerConfig struct {
 var serverConfig ServerConfig
 
 func init() {
-	serverConfig.Port = env_helper.GetInt("SERVER_PORT", 8082)
+	serverConfig.Port = envhelper.GetInt("SERVER_PORT", 8082)
 }
 
 func GetServerConfig() ServerConfig {

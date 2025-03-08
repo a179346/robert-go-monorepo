@@ -3,7 +3,7 @@ package post_board_config
 import (
 	"fmt"
 
-	"github.com/a179346/robert-go-monorepo/pkg/env_helper"
+	"github.com/a179346/robert-go-monorepo/pkg/envhelper"
 )
 
 type RabbitMQConfig struct {
@@ -17,10 +17,10 @@ type RabbitMQConfig struct {
 var rabbitMQConfig RabbitMQConfig
 
 func init() {
-	rabbitMQConfig.Host = env_helper.GetString("RABBITMQ_HOST", "localhost")
-	rabbitMQConfig.Port = env_helper.GetInt("RABBITMQ_PORT", 5672)
-	rabbitMQConfig.User = env_helper.GetString("RABBITMQ_USER", "post-board-user")
-	rabbitMQConfig.Password = env_helper.GetString("RABBITMQ_PASSWORD", "mymqpass")
+	rabbitMQConfig.Host = envhelper.GetString("RABBITMQ_HOST", "localhost")
+	rabbitMQConfig.Port = envhelper.GetInt("RABBITMQ_PORT", 5672)
+	rabbitMQConfig.User = envhelper.GetString("RABBITMQ_USER", "post-board-user")
+	rabbitMQConfig.Password = envhelper.GetString("RABBITMQ_PASSWORD", "mymqpass")
 
 	rabbitMQConfig.Url = fmt.Sprintf(
 		"amqp://%v:%v@%v:%v/",

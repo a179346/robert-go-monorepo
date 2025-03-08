@@ -1,6 +1,6 @@
 package post_board_config
 
-import "github.com/a179346/robert-go-monorepo/pkg/env_helper"
+import "github.com/a179346/robert-go-monorepo/pkg/envhelper"
 
 type JwtConfig struct {
 	Secret        []byte
@@ -10,8 +10,8 @@ type JwtConfig struct {
 var jwtConfig JwtConfig
 
 func init() {
-	jwtConfig.Secret = []byte(env_helper.GetString("JWT_SECRET", "my1-jwt2-3secret"))
-	jwtConfig.ExpireSeconds = env_helper.GetInt("JWT_EXPIRE_SECONDS", 3600)
+	jwtConfig.Secret = []byte(envhelper.GetString("JWT_SECRET", "my1-jwt2-3secret"))
+	jwtConfig.ExpireSeconds = envhelper.GetInt("JWT_EXPIRE_SECONDS", 3600)
 }
 
 func GetJwtConfig() JwtConfig {

@@ -10,7 +10,7 @@ import (
 
 	"github.com/a179346/robert-go-monorepo/pkg/console"
 	"github.com/a179346/robert-go-monorepo/pkg/gohf_extended"
-	"github.com/a179346/robert-go-monorepo/pkg/graceful_shutdown"
+	"github.com/a179346/robert-go-monorepo/pkg/graceful"
 	fileserver_apilogger "github.com/a179346/robert-go-monorepo/services/fileserver/apilogger"
 	fileserver_config "github.com/a179346/robert-go-monorepo/services/fileserver/config"
 	fileserver_server "github.com/a179346/robert-go-monorepo/services/fileserver/server"
@@ -63,7 +63,7 @@ func run() error {
 	}()
 
 	select {
-	case signal := <-graceful_shutdown.ShutDown():
+	case signal := <-graceful.ShutDown():
 		console.Infof("Received signal: %v", signal)
 		return nil
 

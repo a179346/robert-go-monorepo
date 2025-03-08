@@ -1,6 +1,6 @@
 package fileserver_config
 
-import "github.com/a179346/robert-go-monorepo/pkg/env_helper"
+import "github.com/a179346/robert-go-monorepo/pkg/envhelper"
 
 type DebugConfig struct {
 	ResponseErrorDetail bool
@@ -9,7 +9,7 @@ type DebugConfig struct {
 var debugConfig DebugConfig
 
 func init() {
-	debugConfig.ResponseErrorDetail = env_helper.GetBool("DEBUG_RESPONSE_ERROR_DETAIL", true)
+	debugConfig.ResponseErrorDetail = envhelper.GetBool("DEBUG_RESPONSE_ERROR_DETAIL", true)
 }
 
 func GetDebugConfig() DebugConfig {

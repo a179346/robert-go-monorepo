@@ -3,7 +3,7 @@ package fileserver_config
 import (
 	"path/filepath"
 
-	"github.com/a179346/robert-go-monorepo/pkg/env_helper"
+	"github.com/a179346/robert-go-monorepo/pkg/envhelper"
 )
 
 type StorageConfig struct {
@@ -14,7 +14,7 @@ type StorageConfig struct {
 var storageConfig StorageConfig
 
 func init() {
-	storageConfig.RootPath = env_helper.GetString("STORAGE_ROOT_PATH", "./storage/fileserver")
+	storageConfig.RootPath = envhelper.GetString("STORAGE_ROOT_PATH", "./storage/fileserver")
 
 	storageConfig.StoreRootPath = filepath.Join(storageConfig.RootPath, "store")
 }
