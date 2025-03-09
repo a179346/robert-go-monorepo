@@ -4,7 +4,6 @@ go 1.23.4
 
 require (
 	github.com/elastic/go-elasticsearch/v8 v8.17.0
-	github.com/go-jet/jet v2.3.0+incompatible
 	github.com/go-jet/jet/v2 v2.12.0
 	github.com/go-kit/kit v0.13.0
 	github.com/go-playground/validator/v10 v10.23.0

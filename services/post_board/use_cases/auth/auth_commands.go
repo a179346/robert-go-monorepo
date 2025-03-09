@@ -7,7 +7,7 @@ import (
 	"github.com/a179346/robert-go-monorepo/pkg/cryption"
 	"github.com/a179346/robert-go-monorepo/services/post_board/providers/user_provider"
 	"github.com/a179346/robert-go-monorepo/services/post_board/shared/auth_jwt"
-	"github.com/go-jet/jet/qrm"
+	"github.com/go-jet/jet/v2/qrm"
 	"github.com/ztrue/tracerr"
 )
 
@@ -27,7 +27,7 @@ var errWrongPassword = errors.New("Wrong password")
 func (authCommands authCommands) login(ctx context.Context, email string, password string) (string, error) {
 	user, err := authCommands.userProvider.FindByEmail(ctx, email)
 	if err != nil {
-		if err.Error() == qrm.ErrNoRows.Error() {
+		if errors.Is(err, qrm.ErrNoRows) {
 			return "", tracerr.Wrap(errUserNotFound)
 		}
 		return "", tracerr.Errorf("find user by email error: %w", err)

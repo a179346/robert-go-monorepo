@@ -6,7 +6,7 @@ import (
 
 	"github.com/a179346/robert-go-monorepo/services/post_board/database/.jet_gen/post-board/public/model"
 	"github.com/a179346/robert-go-monorepo/services/post_board/providers/user_provider"
-	"github.com/go-jet/jet/qrm"
+	"github.com/go-jet/jet/v2/qrm"
 	"github.com/google/uuid"
 	"github.com/ztrue/tracerr"
 )
@@ -31,7 +31,7 @@ func (userQueries userQueries) findUserById(ctx context.Context, userId string) 
 
 	user, err := userQueries.userProvider.FindById(ctx, id)
 	if err != nil {
-		if err.Error() == qrm.ErrNoRows.Error() {
+		if errors.Is(err, qrm.ErrNoRows) {
 			return model.User{}, tracerr.Wrap(errUserNotFound)
 		}
 		return model.User{}, tracerr.Errorf("find user error: %w", err)

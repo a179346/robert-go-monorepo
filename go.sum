@@ -8,8 +8,6 @@ github.com/elastic/go-elasticsearch/v8 v8.17.0 h1:e9cWksE/Fr7urDRmGPGp47Nsp4/mvN
 github.com/elastic/go-elasticsearch/v8 v8.17.0/go.mod h1:lGMlgKIbYoRvay3xWBeKahAiJOgmFDsjZC39nmO3H64=
 github.com/gabriel-vasile/mimetype v1.4.3 h1:in2uUcidCuFcDKtdcBxlR0rJ1+fsokWf+uqxgUFjbI0=
 github.com/gabriel-vasile/mimetype v1.4.3/go.mod h1:d8uq/6HKRL6CGdk+aubisF/M5GcPfT7nKyLpA0lbSSk=
-github.com/go-jet/jet v2.3.0+incompatible h1:Yg7JSERDC0f9x3dHUBMA2cxe9/qC6qlozDDO/s38USU=
-github.com/go-jet/jet v2.3.0+incompatible/go.mod h1:XgTt00fj8pAXMKe1ETL9R/kZWWyi2j/ymuH+gaW+EdI=
 github.com/go-jet/jet/v2 v2.12.0 h1:z2JfvBAZgsfxlQz6NXBYdZTXc7ep3jhbszTLtETv1JE=
 github.com/go-jet/jet/v2 v2.12.0/go.mod h1:ufQVRQeI1mbcO5R8uCEVcVf3Foej9kReBdwDx7YMWUM=
 github.com/go-kit/kit v0.13.0 h1:OoneCcHKHQ03LfBpoQCUfCluwd2Vt3ohz+kvbJneZAU=
